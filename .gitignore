@@ -1,0 +1,40 @@
+# Node / pnpm
+node_modules/
+pnpm-lock.yaml
+
+# Build / cache
+dist/
+.build/
+.cache/
+.temp/
+coverage/
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE / SO
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Prisma
+apps/backend/prisma/*.db
+apps/backend/prisma/*.sqlite
+apps/backend/prisma/migrations/*/steps.json
+
+# Uploads / públicos gerados
+apps/backend/public/uploads/
+apps/backend/public/i/
+
+# Env (não commitar segredos!)
+.env
+*.env
+apps/backend/.env
+apps/frontend/.env
+
+# Others
+*.local
