@@ -1,10 +1,25 @@
 import { defineStore } from 'pinia';
-import api, { setAuth } from '@/services/ApiClient';
-export const useAuth = defineStore('auth', {
-  state: () => ({ token: localStorage.getItem('token') || '', user: null as null | { id:number; email:string } }),
+import { AuthService } from '@/services/AuthService';
+
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    token: localStorage.getItem('jwt') || '',
+    user: null as null | { id: number; name: string; email: string },
+  }),
+  getters: {
+    isAuthenticated: (s) => !!s.token,
+  },
   actions: {
-    async login(email:string,password:string){ const { data } = await api.login(email,password); this.token=data.accessToken; this.user=data.user; localStorage.setItem('token',this.token); setAuth(this.token); },
-    async register(email:string,password:string){ const { data } = await api.register(email,password); this.token=data.accessToken; this.user=data.user; localStorage.setItem('token',this.token); setAuth(this.token); },
-    logout(){ this.token=''; this.user=null; localStorage.removeItem('token'); setAuth(); }
-  }
+    async login(email: string, password: string) {
+      const { token, user } = await AuthService.login(email, password);
+      this.token = token;
+      this.user = user;
+      localStorage.setItem('jwt', token);
+    },
+    logout() {
+      this.token = '';
+      this.user = null;
+      localStorage.removeItem('jwt');
+    },
+  },
 });
