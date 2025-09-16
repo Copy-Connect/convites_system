@@ -1,0 +1,33 @@
+databases:
+  - name: convites-db
+    plan: free
+
+services:
+  - type: web
+    name: convites-api
+    env: node
+    plan: free
+    rootDir: apps/backend
+    region: oregon           # ou frankfurt/virginia
+    runtime: node
+    buildCommand: >
+      npm i -g pnpm &&
+      pnpm i --frozen-lockfile &&
+      pnpm prisma generate &&
+      pnpm build
+    startCommand: node dist/src/main.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: DATABASE_URL
+        fromDatabase: convites-db
+      - key: NODE_ENV
+        value: production
+      - key: PAGSEGURO_WEBHOOK_TOKEN
+        sync: false
+      - key: PAGSEGURO_HMAC_SECRET
+        sync: false
+      - key: BASE_URL
+        value: https://convites.copyconnect.com.br
+    postDeployCommand: pnpm prisma migrate deploy
