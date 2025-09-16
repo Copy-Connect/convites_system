@@ -1,10 +1,11 @@
 {
   "name": "convites-monorepo",
   "private": true,
+  "engines": { "node": ">=20" },
+  "packageManager": "pnpm@9.15.8",
   "scripts": {
     "dev:backend": "pnpm -C apps/backend start:dev",
     "dev:frontend": "pnpm -C apps/frontend dev",
-    "dev": "concurrently -k \"pnpm dev:backend\" \"pnpm dev:frontend\"",
     "build": "pnpm -C apps/backend build && pnpm -C apps/frontend build"
   },
   "devDependencies": {
