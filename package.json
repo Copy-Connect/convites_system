@@ -8,8 +8,15 @@
     "dev:frontend": "pnpm -C apps/frontend dev",
     "build": "pnpm -C apps/backend build && pnpm -C apps/frontend build"
   },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+
+
   "devDependencies": {
     "@types/node": "^22.18.1",
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "@types/express": "^4.17.21"
+
   }
 }
