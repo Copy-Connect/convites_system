@@ -1,13 +1,14 @@
 {
   "name": "convites-monorepo",
   "private": true,
-    "scripts": {
+  "scripts": {
     "dev:backend": "pnpm -C apps/backend start:dev",
     "dev:frontend": "pnpm -C apps/frontend dev",
     "dev": "concurrently -k \"pnpm dev:backend\" \"pnpm dev:frontend\"",
     "build": "pnpm -C apps/backend build && pnpm -C apps/frontend build"
   },
   "devDependencies": {
+    "@types/node": "^22.18.1",
     "concurrently": "^9.2.1"
   }
 }
