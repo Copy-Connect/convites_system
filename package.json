@@ -2,7 +2,7 @@
   "name": "convites-monorepo",
   "private": true,
   "engines": { "node": ">=20" },
-  "packageManager": "pnpm@9.15.8",
+  "packageManager": "pnpm@9.12.2",
   "scripts": {
     "dev:backend": "pnpm -C apps/backend start:dev",
     "dev:frontend": "pnpm -C apps/frontend dev",
