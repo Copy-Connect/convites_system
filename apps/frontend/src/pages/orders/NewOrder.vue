@@ -11,7 +11,7 @@
         <option disabled value="">-- selecione --</option>
         <option value="mario">Super Mario</option>
         <option value="futebol">Futebol</option>
-        <option value="unicórnio">Unicórnio</option>
+        <option value="unicornio">Unicórnio</option>
       </select>
     </label>
 
@@ -25,17 +25,30 @@ import { ref } from 'vue';
 import { OrdersService } from '@/services/OrdersService';
 import { useRouter } from 'vue-router';
 
-const name = ref(''); const age = ref<number|undefined>(); const address = ref('');
-const themeSlug = ref(''); const loading = ref(false); const error = ref('');
+const name = ref('');
+const age = ref<number | undefined>();
+const address = ref('');
+const themeSlug = ref('');
+const loading = ref(false);
+const error = ref('');
 const router = useRouter();
 
 async function submit() {
-  loading.value = true; error.value = '';
+  loading.value = true;
+  error.value = '';
   try {
-    const order = await OrdersService.create({ name: name.value, age: age.value!, address: address.value, themeSlug: themeSlug.value });
-    router.push({ name: 'orders-show', params: { id: order.id } });
-  } catch (e:any) { error.value = e.message || 'Erro ao criar pedido'; }
-  finally { loading.value = false; }
+    const order = await OrdersService.create({
+      name: name.value,
+      age: age.value!,
+      address: address.value,
+      themeSlug: themeSlug.value,
+    });
+    router.push({ name: 'orders-checkout', params: { id: order.id } });
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || e.message || 'Erro ao criar pedido';
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
