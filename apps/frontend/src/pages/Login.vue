@@ -1,54 +1,75 @@
 <template>
-  <section class="auth-scene">
-    <div class="auth-glow auth-glow-sky" />
-    <div class="auth-glow auth-glow-sunset" />
+  <section class="login-scene">
+    <div class="backdrop backdrop-blue" />
+    <div class="backdrop backdrop-pink" />
+    <div class="backdrop backdrop-gold" />
 
-    <div class="auth-shell">
-      <aside class="story-panel">
-        <span class="eyebrow">Convites Animados</span>
-        <h1>Seu universo infantil começa com uma entrada de cinema.</h1>
-        <p class="lede">
-          Crie convites digitais com movimento, personagens encantadores e uma apresentação
-          feita para surpreender crianças e famílias.
-        </p>
+    <div class="login-shell">
+      <aside class="showcase-panel">
+        <div class="showcase-copy">
+          <span class="eyebrow">Convites tematicos</span>
+          <h1>Personagens que chamam atencao logo na entrada.</h1>
+          <p class="lede">
+            Uma pagina de acesso com clima de festa, visual infantil premium e composicao
+            equilibrada para destacar os temas sem pesar a experiencia.
+          </p>
 
-        <div class="character-stage">
-          <div class="moon" />
-          <div class="hill hill-back" />
-          <div class="hill hill-front" />
-          <div class="castle">
-            <span class="tower left" />
-            <span class="tower right" />
-            <span class="gate" />
-          </div>
-          <div class="friends">
-            <span class="friend lion">
-              <i class="head" />
-              <i class="body" />
-            </span>
-            <span class="friend bunny">
-              <i class="head" />
-              <i class="body" />
-            </span>
-            <span class="friend star">
-              <i class="core" />
-            </span>
+          <div class="theme-pills">
+            <span>Super-herois</span>
+            <span>Corrida</span>
+            <span>Aventura</span>
+            <span>Princesas urbanas</span>
           </div>
         </div>
 
-        <ul class="feature-list">
-          <li>Animações delicadas para abrir o convite como um pequeno espetáculo.</li>
-          <li>Personagens infantis com direção visual leve, elegante e memorável.</li>
-          <li>Fluxo simples para aprovar arte, pagamento e entrega em poucos cliques.</li>
-        </ul>
+        <div class="hero-gallery">
+          <article class="hero-card hero-card-sonic">
+            <div class="hero-copy">
+              <strong>Energia</strong>
+              <span>Temas intensos com impacto visual forte</span>
+            </div>
+            <img src="/login/sonic.png" alt="Personagem azul em corrida com raios" />
+          </article>
+
+          <article class="hero-card hero-card-ladybug">
+            <div class="hero-copy">
+              <strong>Encanto</strong>
+              <span>Composicoes delicadas e cheias de personalidade</span>
+            </div>
+            <img src="/login/ladybug.png" alt="Heroina de roupa vermelha com bolinhas" />
+          </article>
+
+          <div class="mini-strip">
+            <article v-for="item in miniThemes" :key="item.title" class="mini-card">
+              <img :src="item.image" :alt="item.alt" />
+              <div>
+                <strong>{{ item.title }}</strong>
+                <span>{{ item.caption }}</span>
+              </div>
+            </article>
+          </div>
+        </div>
       </aside>
 
       <form class="auth-card" @submit.prevent="submit">
-        <span class="mini-badge">Acesso do cliente</span>
-        <h2>Entrar na sua vitrine de festas</h2>
+        <div class="card-top">
+          <span class="mini-badge">Acesso do cliente</span>
+          <div class="spotlight">
+            <img src="/login/stitch.png" alt="Mascote azul saindo de uma caixa de presente" />
+          </div>
+        </div>
+
+        <h2>Entre para acompanhar seus convites</h2>
         <p class="form-copy">
-          Acompanhe pedidos, status de pagamento e a produção dos convites animados.
+          Veja pedidos, aprovacoes e etapas de producao em um painel com a mesma energia dos
+          seus temas favoritos.
         </p>
+
+        <div class="feature-band">
+          <span>Arte personalizada</span>
+          <span>Pagamento rapido</span>
+          <span>Entrega digital</span>
+        </div>
 
         <label class="field">
           <span>E-mail</span>
@@ -61,7 +82,7 @@
         </label>
 
         <button class="submit" :disabled="loading">
-          {{ loading ? 'Entrando...' : 'Entrar' }}
+          {{ loading ? 'Entrando...' : 'Entrar agora' }}
         </button>
 
         <p class="switch">
@@ -79,331 +100,363 @@ import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
-const email = ref(''); const password = ref(''); const loading = ref(false); const error = ref('');
-const router = useRouter(); const route = useRoute();
+const miniThemes = [
+  {
+    title: 'Corrida',
+    caption: 'McQueen para uma abertura vibrante',
+    image: '/login/mcqueen.png',
+    alt: 'Carro vermelho inspirado em corrida',
+  },
+  {
+    title: 'Aventura',
+    caption: 'Hot Wheels com tracao e contraste forte',
+    image: '/login/hotwheels.png',
+    alt: 'Carrinho off-road com tema Hot Wheels',
+  },
+  {
+    title: 'Surpresa',
+    caption: 'Stitch com clima divertido e fofo',
+    image: '/login/stitch.png',
+    alt: 'Mascote azul com orelhas grandes saindo de presente',
+  },
+  {
+    title: 'Festa geek',
+    caption: 'Bolo tematico para aniversario memoravel',
+    image: '/login/spiderman-cake.png',
+    alt: 'Heroi vermelho segurando bolo decorado',
+  },
+];
+
+const email = ref('');
+const password = ref('');
+const loading = ref(false);
+const error = ref('');
+const router = useRouter();
+const route = useRoute();
 const auth = useAuthStore();
 
 async function submit() {
-  loading.value = true; error.value = '';
+  loading.value = true;
+  error.value = '';
   try {
     await auth.login(email.value, password.value);
     router.replace((route.query.redirect as string) || { name: 'dashboard' });
-  } catch (e:any) {
+  } catch (e: any) {
     error.value = e.message || 'Falha ao entrar';
-  } finally { loading.value = false; }
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
 <style scoped>
-.auth-scene {
+.login-scene {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
   padding: 32px;
+  background:
+    radial-gradient(circle at top left, rgba(84, 157, 255, 0.26), transparent 28%),
+    radial-gradient(circle at right center, rgba(255, 78, 122, 0.18), transparent 30%),
+    linear-gradient(140deg, #fff5ea 0%, #ffe7dc 42%, #dfeeff 100%);
 }
 
-.auth-glow {
+.backdrop {
   position: absolute;
   border-radius: 999px;
-  filter: blur(10px);
+  filter: blur(18px);
+  opacity: 0.85;
   pointer-events: none;
 }
 
-.auth-glow-sky {
-  top: -60px;
-  right: -20px;
+.backdrop-blue {
+  top: -80px;
+  left: -60px;
+  width: 280px;
+  height: 280px;
+  background: rgba(31, 117, 255, 0.24);
+}
+
+.backdrop-pink {
+  right: -40px;
+  top: 24%;
+  width: 260px;
+  height: 260px;
+  background: rgba(255, 77, 125, 0.16);
+}
+
+.backdrop-gold {
+  left: 42%;
+  bottom: -90px;
   width: 320px;
   height: 320px;
-  background: rgba(94, 166, 214, 0.26);
+  background: rgba(255, 196, 87, 0.18);
 }
 
-.auth-glow-sunset {
-  bottom: -80px;
-  left: -40px;
-  width: 360px;
-  height: 360px;
-  background: rgba(239, 109, 79, 0.18);
-}
-
-.auth-shell {
+.login-shell {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(340px, 420px);
+  grid-template-columns: minmax(0, 1.25fr) minmax(350px, 430px);
   gap: 28px;
-  align-items: stretch;
-  max-width: 1240px;
+  align-items: center;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
-.story-panel,
+.showcase-panel,
 .auth-card {
-  animation: rise 600ms ease both;
+  animation: rise 650ms ease both;
 }
 
-.story-panel {
+.showcase-panel {
   display: grid;
-  align-content: start;
-  gap: 18px;
-  padding: 42px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 36px;
-  color: #fff7f0;
-  background:
-    radial-gradient(circle at top right, rgba(255, 232, 165, 0.28), transparent 28%),
-    linear-gradient(155deg, #173157 0%, #214a7a 42%, #123050 100%);
-  box-shadow: var(--shadow);
+  gap: 24px;
+}
+
+.showcase-copy {
+  max-width: 760px;
 }
 
 .eyebrow,
 .mini-badge {
+  display: inline-flex;
+  align-items: center;
   width: fit-content;
-  letter-spacing: 0.14em;
+  padding: 0.6rem 0.95rem;
+  border-radius: 999px;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .eyebrow {
-  padding: 0.55rem 0.9rem;
-  border-radius: 999px;
   color: #173157;
-  background: rgba(255, 240, 216, 0.95);
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 12px 28px rgba(32, 47, 95, 0.12);
 }
 
-.story-panel h1,
+.showcase-copy h1,
 .auth-card h2 {
-  margin: 0;
-  line-height: 1.02;
+  margin: 16px 0 0;
+  line-height: 0.97;
   font-family: Georgia, "Times New Roman", serif;
 }
 
-.story-panel h1 {
-  max-width: 11ch;
-  font-size: clamp(2.7rem, 5vw, 4.8rem);
+.showcase-copy h1 {
+  max-width: 10ch;
+  font-size: clamp(3rem, 5vw, 5.6rem);
+  color: #192848;
 }
 
 .lede {
-  max-width: 58ch;
-  margin: 0;
+  max-width: 56ch;
+  margin: 18px 0 0;
   font-size: 1.04rem;
   line-height: 1.7;
-  color: rgba(255, 247, 240, 0.82);
+  color: #4f5b76;
 }
 
-.character-stage {
-  position: relative;
-  min-height: 320px;
-  margin-top: 8px;
-  overflow: hidden;
-  border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 218, 169, 0.24) 0%, rgba(255, 255, 255, 0) 45%),
-    linear-gradient(180deg, #2a5c93 0%, #173157 100%);
-}
-
-.moon {
-  position: absolute;
-  top: 34px;
-  right: 48px;
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #fffef9 0%, #ffe8b0 55%, #ffd18f 100%);
-  box-shadow: 0 0 40px rgba(255, 227, 154, 0.45);
-}
-
-.hill {
-  position: absolute;
-  left: -5%;
-  right: -5%;
-  border-radius: 50%;
-}
-
-.hill-back {
-  bottom: 72px;
-  height: 140px;
-  background: #255b66;
-}
-
-.hill-front {
-  bottom: -58px;
-  height: 180px;
-  background: #4a9b76;
-}
-
-.castle {
-  position: absolute;
-  left: 50%;
-  bottom: 112px;
-  width: 156px;
-  height: 118px;
-  transform: translateX(-50%);
-  border-radius: 18px 18px 8px 8px;
-  background: linear-gradient(180deg, #fff5e4 0%, #f0d8b4 100%);
-}
-
-.tower {
-  position: absolute;
-  bottom: 68px;
-  width: 34px;
-  height: 82px;
-  border-radius: 14px 14px 0 0;
-  background: linear-gradient(180deg, #fff7ea 0%, #f0d9b2 100%);
-}
-
-.tower.left {
-  left: 14px;
-}
-
-.tower.right {
-  right: 14px;
-}
-
-.gate {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 38px;
-  height: 56px;
-  transform: translateX(-50%);
-  border-radius: 22px 22px 0 0;
-  background: #d2784e;
-}
-
-.friends {
-  position: absolute;
-  right: 52px;
-  bottom: 52px;
+.theme-pills {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.theme-pills span,
+.feature-band span {
+  padding: 0.72rem 0.95rem;
+  border: 1px solid rgba(25, 40, 72, 0.08);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #253556;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 14px 30px rgba(39, 55, 94, 0.08);
+}
+
+.hero-gallery {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.72fr);
   gap: 18px;
-  align-items: end;
+  align-items: stretch;
 }
 
-.friend {
+.hero-card {
   position: relative;
-  display: inline-block;
+  min-height: 430px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  border-radius: 36px;
+  box-shadow: 0 28px 60px rgba(35, 49, 88, 0.18);
+  isolation: isolate;
 }
 
-.friend .head,
-.friend .body,
-.friend .core {
+.hero-card::after {
+  content: '';
   position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  background: linear-gradient(180deg, rgba(12, 19, 36, 0) 0%, rgba(12, 19, 36, 0.58) 100%);
+  z-index: 0;
+}
+
+.hero-card img {
+  position: absolute;
+  inset: auto auto -10px 50%;
+  max-width: none;
+  transform: translateX(-50%);
+  z-index: -1;
+}
+
+.hero-card-sonic {
+  background:
+    radial-gradient(circle at top center, rgba(96, 214, 255, 0.4), transparent 32%),
+    linear-gradient(160deg, #173b7e 0%, #1d5fc0 48%, #53d8ff 100%);
+}
+
+.hero-card-sonic img {
+  width: min(560px, 95%);
+}
+
+.hero-card-ladybug {
+  background:
+    radial-gradient(circle at top center, rgba(255, 202, 222, 0.24), transparent 30%),
+    linear-gradient(180deg, #fff8fb 0%, #ffd9e4 100%);
+}
+
+.hero-card-ladybug img {
+  bottom: -36px;
+  width: min(420px, 95%);
+}
+
+.hero-copy {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1;
+  display: grid;
+  gap: 6px;
+  color: #fffdf9;
+}
+
+.hero-card-ladybug .hero-copy {
+  color: #2e2d36;
+}
+
+.hero-copy strong {
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hero-copy span {
+  max-width: 22ch;
+  line-height: 1.4;
+}
+
+.mini-strip {
+  display: grid;
+  gap: 16px;
+}
+
+.mini-card {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  min-height: 100px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.44);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.66);
+  box-shadow: 0 18px 40px rgba(35, 49, 88, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.mini-card img {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 20px rgba(20, 36, 70, 0.18));
+}
+
+.mini-card strong,
+.mini-card span {
   display: block;
 }
 
-.lion,
-.bunny {
-  width: 54px;
-  height: 96px;
+.mini-card strong {
+  color: #1c2d4b;
 }
 
-.lion .head {
-  top: 8px;
-  left: 7px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle, #ffdca9 0 45%, #cf7f34 47% 100%);
-}
-
-.lion .body {
-  left: 15px;
-  bottom: 10px;
-  width: 25px;
-  height: 44px;
-  border-radius: 20px;
-  background: #ffbe61;
-}
-
-.bunny .head {
-  top: 10px;
-  left: 10px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #fff8f1;
-  box-shadow:
-    -8px -16px 0 -7px #ffd5de,
-    8px -16px 0 -7px #ffd5de;
-}
-
-.bunny .body {
-  left: 13px;
-  bottom: 8px;
-  width: 28px;
-  height: 46px;
-  border-radius: 22px;
-  background: #fff2df;
-}
-
-.star {
-  width: 46px;
-  height: 46px;
-  margin-bottom: 22px;
-}
-
-.star .core {
-  inset: 0;
-  clip-path: polygon(50% 0%, 61% 34%, 98% 35%, 69% 57%, 79% 93%, 50% 72%, 21% 93%, 31% 57%, 2% 35%, 39% 34%);
-  background: linear-gradient(180deg, #fff1a8 0%, #ffc758 100%);
-}
-
-.feature-list {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.feature-list li {
-  position: relative;
-  padding-left: 22px;
-  color: rgba(255, 247, 240, 0.86);
-  line-height: 1.5;
-}
-
-.feature-list li::before {
-  content: '';
-  position: absolute;
-  top: 0.65rem;
-  left: 0;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #ffd26d;
-  box-shadow: 0 0 18px rgba(255, 210, 109, 0.4);
+.mini-card span {
+  margin-top: 4px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #5c6783;
 }
 
 .auth-card {
-  align-self: center;
   display: grid;
   gap: 18px;
-  padding: 34px;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 30px;
-  background: var(--surface);
-  backdrop-filter: blur(12px);
-  box-shadow: var(--shadow);
+  padding: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.54);
+  border-radius: 34px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 247, 242, 0.92) 100%);
+  box-shadow: 0 28px 65px rgba(34, 50, 91, 0.18);
+  backdrop-filter: blur(14px);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .mini-badge {
-  padding: 0.5rem 0.85rem;
-  border-radius: 999px;
-  color: var(--accent-strong);
-  background: rgba(239, 109, 79, 0.1);
+  color: #c84b42;
+  background: rgba(255, 116, 90, 0.12);
+}
+
+.spotlight {
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top, rgba(103, 220, 255, 0.42), transparent 52%),
+    linear-gradient(160deg, #e8f5ff 0%, #fff3fb 100%);
+}
+
+.spotlight img {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 18px rgba(49, 77, 131, 0.2));
 }
 
 .auth-card h2 {
-  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  color: #1b2646;
 }
 
 .form-copy {
   margin: -4px 0 4px;
-  color: var(--muted);
-  line-height: 1.6;
+  line-height: 1.65;
+  color: #66728d;
+}
+
+.feature-band {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .field {
@@ -413,24 +466,24 @@ async function submit() {
 
 .field span {
   font-size: 0.92rem;
-  font-weight: 700;
-  color: #314060;
+  font-weight: 800;
+  color: #30405e;
 }
 
 .submit {
-  min-height: 56px;
-  margin-top: 6px;
+  min-height: 58px;
+  margin-top: 4px;
   border-radius: 18px;
-  font-weight: 700;
-  color: #fff8f2;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
-  box-shadow: 0 16px 24px rgba(216, 78, 56, 0.2);
+  font-weight: 800;
+  color: #fff9f4;
+  background: linear-gradient(135deg, #ff6f5d 0%, #d83d51 52%, #3f79ff 100%);
+  box-shadow: 0 18px 28px rgba(186, 73, 75, 0.28);
   transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
 }
 
 .submit:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 18px 28px rgba(216, 78, 56, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 22px 34px rgba(186, 73, 75, 0.32);
 }
 
 .submit:disabled {
@@ -440,18 +493,18 @@ async function submit() {
 
 .switch {
   margin: 0;
-  color: var(--muted);
+  color: #67748f;
 }
 
 .switch a {
   margin-left: 6px;
-  font-weight: 700;
-  color: var(--accent-strong);
+  font-weight: 800;
+  color: #d84e38;
 }
 
 .error {
   margin: 0;
-  padding: 0.85rem 1rem;
+  padding: 0.9rem 1rem;
   border-radius: 16px;
   color: #9a1e17;
   background: rgba(216, 78, 56, 0.12);
@@ -460,7 +513,7 @@ async function submit() {
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(22px);
   }
   to {
     opacity: 1;
@@ -468,35 +521,73 @@ async function submit() {
   }
 }
 
-@media (max-width: 980px) {
-  .auth-scene {
-    padding: 18px;
-  }
-
-  .auth-shell {
+@media (max-width: 1180px) {
+  .login-shell {
     grid-template-columns: 1fr;
   }
 
-  .story-panel,
   .auth-card {
-    padding: 28px;
+    order: -1;
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 860px) {
+  .login-scene {
+    padding: 18px;
   }
 
-  .story-panel h1 {
+  .showcase-copy h1 {
     max-width: 100%;
+    font-size: clamp(2.5rem, 12vw, 4rem);
+  }
+
+  .hero-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-card {
+    min-height: 360px;
+  }
+
+  .mini-strip {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  .character-stage {
-    min-height: 260px;
+  .auth-card,
+  .hero-card,
+  .mini-card {
+    border-radius: 24px;
   }
 
-  .friends {
-    right: 24px;
-    bottom: 42px;
-    transform: scale(0.9);
-    transform-origin: bottom right;
+  .auth-card {
+    padding: 24px;
+  }
+
+  .card-top {
+    align-items: flex-start;
+  }
+
+  .spotlight {
+    width: 88px;
+    height: 88px;
+    border-radius: 22px;
+  }
+
+  .spotlight img {
+    width: 72px;
+    height: 72px;
+  }
+
+  .mini-card {
+    grid-template-columns: 78px minmax(0, 1fr);
+  }
+
+  .mini-card img {
+    width: 78px;
+    height: 78px;
   }
 }
 </style>
