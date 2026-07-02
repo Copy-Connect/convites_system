@@ -4,7 +4,7 @@ import { AuthService } from '@/services/AuthService';
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: localStorage.getItem('jwt') || '',
-    user: null as null | { id: number; name: string; email: string },
+    user: null as null | { id: string; name: string | null; email: string },
   }),
   getters: {
     isAuthenticated: (s) => !!s.token,

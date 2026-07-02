@@ -1,6 +1,75 @@
-:root{--bg:#0b0b12;--fg:#e8e8ee;--muted:#9aa;--accent:#7c5cff}
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,Segoe UI,Roboto,Ubuntu,sans-serif;background:var(--bg);color:var(--fg)}
-button{background:var(--accent);border:none;color:white;padding:.6rem .9rem;border-radius:.6rem;cursor:pointer}
-input,select{padding:.6rem .8rem;border-radius:.6rem;border:1px solid #333;background:#13131a;color:var(--fg)}
-form{display:grid;gap:.6rem}
+:root {
+  --bg: #f7efe2;
+  --bg-deep: #10243f;
+  --surface: rgba(255, 250, 244, 0.88);
+  --surface-strong: rgba(255, 255, 255, 0.96);
+  --text: #1a2440;
+  --muted: #6f738f;
+  --line: rgba(26, 36, 64, 0.12);
+  --accent: #ef6d4f;
+  --accent-strong: #d84e38;
+  --accent-soft: #ffd7ad;
+  --sky: #5ea6d6;
+  --mint: #87d8b6;
+  --shadow: 0 24px 70px rgba(28, 39, 77, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background:
+    radial-gradient(circle at top left, rgba(255, 214, 165, 0.95), transparent 26%),
+    radial-gradient(circle at 80% 20%, rgba(135, 216, 182, 0.6), transparent 24%),
+    linear-gradient(180deg, #fff8ef 0%, #f7efe2 52%, #f3e5d4 100%);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: var(--text);
+  font-family: "Trebuchet MS", "Avenir Next", "Segoe UI", sans-serif;
+  background: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.92);
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(239, 109, 79, 0.45);
+  box-shadow: 0 0 0 4px rgba(239, 109, 79, 0.14);
+}
+
+#app {
+  min-height: 100vh;
+}
