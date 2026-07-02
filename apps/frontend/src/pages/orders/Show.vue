@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { OrdersService } from '@/services/OrderServices';
+import { OrdersService } from '@/services/OrdersService';
 import type { Order } from '@/models/Order';
 
 const route = useRoute();

@@ -1,42 +1,39 @@
-Visão geral do repositório
-Monorepo com PNPM – O arquivo pnpm-workspace.yaml define dois conjuntos de pacotes: apps/* (aplicações) e packages/* (bibliotecas compartilhadas).
+Visao geral do repositorio
 
-O package.json raiz contém scripts que rodam backend e frontend simultaneamente com pnpm dev.
+Monorepo com PNPM. O arquivo `pnpm-workspace.yaml` agrupa os apps do projeto em `apps/*`.
 
-Packages compartilhados
-O pacote @convites/shared reúne tipos e DTOs reutilizados entre backend e frontend, incluindo definições de pedidos e autenticação e o tipo OrderStatus.
+O `package.json` raiz contem scripts para subir backend e frontend em paralelo com `pnpm run dev`.
 
-Backend (apps/backend)
-Construído com NestJS e organizado em módulos (AuthModule, OrdersModule, ThemesModule, PaymentsModule) carregados pelo AppModule.
+Backend (`apps/backend`)
 
-O main.ts inicializa o servidor, aplicando ValidationPipe e HttpExceptionFilter globais para validação e tratamento de erros.
+Aplicacao NestJS com modulos de autenticacao, pedidos e pagamentos carregados pelo `AppModule`.
 
-O schema.prisma modela o banco MySQL com entidades User, Theme, Order e Payment, além do enum OrderStatus.
+O `main.ts` inicializa a API HTTP e o `schema.prisma` descreve as entidades `User`, `Theme`, `Order` e `Payment`.
 
-AuthService utiliza Argon2 para hash de senhas e JWT para emitir tokens de acesso e refresh.
+`AuthService` cuida de hash de senha com Argon2 e emissao de JWT.
 
-Integração de pagamento via PagSeguro, implementada no PagSeguroGateway com chamadas HTTP e tradução de webhooks de status de pagamento.
+`PagSeguroGateway` centraliza a integracao de pagamentos.
 
-Frontend (apps/frontend)
-Aplicação Vue 3 + Vite com Pinia e Vue Router, conforme package.json.
+Frontend (`apps/frontend`)
 
-main.ts instancia a aplicação Vue, acoplando store e roteador.
+Aplicacao Vue 3 + Vite com Pinia e Vue Router.
 
-O roteador define rotas para login, registro, dashboard e fluxo de pedidos, exigindo autenticação em rotas internas através de um guard que consulta o store de auth.
+`main.ts` monta a aplicacao, conecta o roteador e registra o store.
 
-O store auth.store.ts gerencia token JWT e dados do usuário em localStorage.
+O roteador define as rotas de login, cadastro, dashboard e pedidos, protegendo as rotas internas com o store de autenticacao.
 
-AuthService no frontend abstrai chamadas HTTP de login e registro para o backend via um cliente REST simples.
+`auth.store.ts` persiste token JWT e dados do usuario em `localStorage`.
 
-Pontos importantes para quem está começando
-Tipos compartilhados – Revise o pacote @convites/shared para entender o formato das requisições e respostas usadas entre front e back.
+`AuthService` abstrai as chamadas HTTP de login e cadastro.
 
-Arquitetura do backend – Explore src no backend: módulos em modules/, regras de negócio em domain/ e implementações de infraestrutura em infrastructure/. O arquivo AppModule mostra como tudo é conectado.
+Pontos importantes para comecar
 
-Prisma e banco de dados – O schema.prisma descreve o modelo relacional; utilize pnpm -C apps/backend prisma:dev para gerar migrations e dados seed quando estiver desenvolvendo.
+Arquitetura do backend: explore `apps/backend/src` e use o `AppModule` como ponto de entrada para entender as dependencias.
 
-Fluxo de autenticação – Veja AuthService no backend e auth.store.ts no frontend para entender como o login funciona, do hash de senha até o armazenamento do token.
+Prisma e banco de dados: use `pnpm -C apps/backend prisma:dev` para criar migracoes e popular dados de desenvolvimento.
 
-Pagamentos – O gateway PagSeguro centraliza comunicação com a API de pagamentos; estudar esse módulo ajuda a entender o fluxo de cobrança e webhooks.
+Fluxo de autenticacao: veja `AuthService` no backend e `auth.store.ts` no frontend.
 
-Frontend em Vue – Comece pelos arquivos main.ts e router/index.ts para ver como o app é montado e roteado. O Pinia store (auth.store.ts) demonstra o gerenciamento de estado reativo.
+Pagamentos: o modulo de pagamentos concentra checkout, consulta de status e webhook.
+
+Frontend em Vue: comece por `main.ts` e `router/index.ts`.

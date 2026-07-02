@@ -18,9 +18,16 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+
+const router = useRouter();
 const auth = useAuthStore();
-const logout = () => auth.logout();
+
+const logout = async () => {
+  auth.logout();
+  await router.replace({ name: 'login' });
+};
 </script>
 
 <style scoped>
