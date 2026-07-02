@@ -318,7 +318,8 @@ async function submit() {
 }
 
 .hero-card-sonic img {
-  width: min(560px, 95%);
+  width: min(460px, 70%);
+
 }
 
 .hero-card-ladybug {
@@ -344,7 +345,7 @@ async function submit() {
 }
 
 .hero-card-ladybug .hero-copy {
-  color: #2e2d36;
+  color: #fffdf9;
 }
 
 .hero-copy strong {
