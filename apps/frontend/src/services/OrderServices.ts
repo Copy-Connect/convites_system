@@ -11,7 +11,10 @@ export const OrdersService = {
     // backend: POST /orders -> { id, ... }
     return api.post<Order>('/orders', input);
   },
-  get(id: number) {
+  get(id: string) {
     return api.get<Order>(`/orders/${id}`);
+  },
+  generateInvite(id: string) {
+    return api.post<{ path: string }>(`/orders/${id}/invite`);
   },
 };

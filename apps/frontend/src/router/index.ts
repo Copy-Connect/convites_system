@@ -18,6 +18,7 @@ const routes: RouteRecordRaw[] = [
       { path: '', name: 'dashboard', component: () => import('@/pages/Dashboard.vue') },
       { path: 'orders/new', name: 'orders-new', component: () => import('@/pages/orders/NewOrder.vue') },
       { path: 'orders/:id', name: 'orders-show', component: () => import('@/pages/orders/Show.vue') },
+      { path: 'checkout/:id', name: 'orders-checkout', component: () => import('@/pages/orders/Checkout.vue') },
     ],
   },
 ]
