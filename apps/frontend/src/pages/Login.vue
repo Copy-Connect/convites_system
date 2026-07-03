@@ -8,17 +8,16 @@
       <aside class="showcase-panel">
         <div class="showcase-copy">
           <span class="eyebrow">Convites tematicos</span>
-          <h1>Personagens que chamam atencao logo na entrada.</h1>
+          <h1>Personalize o convite da sua festa com temas que combinam.</h1>
           <p class="lede">
-            Uma pagina de acesso com clima de festa, visual infantil premium e composicao
-            equilibrada para destacar os temas sem pesar a experiencia.
+            Convites com fontes e músicas temáticas para criar uma experiência completa para seus convidados.
           </p>
 
           <div class="theme-pills">
             <span>Super-herois</span>
             <span>Corrida</span>
             <span>Aventura</span>
-            <span>Princesas urbanas</span>
+            <span>Princesas</span>
           </div>
         </div>
 
@@ -121,7 +120,7 @@ const miniThemes = [
   },
   {
     title: 'Festa geek',
-    caption: 'Bolo tematico para aniversario memoravel',
+    caption: 'Super-herois com cores vibrantes e energia',
     image: '/login/spiderman-cake.png',
     alt: 'Heroi vermelho segurando bolo decorado',
   },
