@@ -5,23 +5,37 @@
 
     <header class="app-header">
       <RouterLink class="brand" to="/">
-        <span class="brand-mark">C</span>
+        <span class="brand-mark">CP</span>
         <span class="brand-copy">
           <strong>Convites Premium</strong>
-          <small>Pedido, pagamento e entrega no mesmo fluxo</small>
+          <small>Painel de pedidos, pagamento e entrega</small>
         </span>
       </RouterLink>
 
       <nav class="app-nav">
-        <RouterLink to="/">Dashboard</RouterLink>
-        <RouterLink to="/orders/new">Pedido rapido</RouterLink>
+        <RouterLink :class="{ 'is-current': route.name === 'dashboard' }" to="/">
+          Dashboard
+        </RouterLink>
+        <RouterLink
+          :class="{ 'is-current': String(route.name || '').startsWith('orders-') }"
+          :to="{ name: 'orders-index' }"
+        >
+          Pedidos
+        </RouterLink>
+        <span aria-disabled="true">Temas</span>
+        <span aria-disabled="true">Histórico</span>
       </nav>
 
-      <div class="account">
+      <div class="header-actions">
+        <RouterLink class="new-order" :to="{ name: 'orders-new' }">+ Novo Pedido</RouterLink>
+
+        <div class="divider" />
+
         <div class="account-copy">
           <span>Conta ativa</span>
           <strong>{{ userLabel }}</strong>
         </div>
+        <span class="avatar">{{ userInitials }}</span>
         <button class="logout" @click="logout">Sair</button>
       </div>
     </header>
@@ -34,13 +48,25 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const route = useRoute();
 const auth = useAuthStore();
 
-const userLabel = computed(() => auth.user?.name || auth.user?.email || 'Cliente');
+const userLabel = computed(() => auth.user?.name || auth.user?.email || 'Administrador');
+const userInitials = computed(() => {
+  const value = auth.user?.name || auth.user?.email || 'CP';
+  const initials = value
+    .split(/[ .@_-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+
+  return initials || 'CP';
+});
 
 const logout = async () => {
   auth.logout();
@@ -111,11 +137,10 @@ const logout = async () => {
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 48px;
+  width: 54px;
   height: 48px;
   border-radius: 16px;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.4rem;
+  font-size: 0.92rem;
   font-weight: 800;
   color: #fffaf5;
   background: linear-gradient(135deg, #ff7a66 0%, #d84752 52%, #3e74f2 100%);
@@ -148,41 +173,79 @@ const logout = async () => {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .app-nav a,
-.logout {
-  min-height: 48px;
-  padding: 0 1rem;
-  border-radius: 16px;
-  font-weight: 800;
-}
-
-.app-nav a {
+.app-nav span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 46px;
+  padding: 0 1rem;
+  border-radius: 16px;
+  font-weight: 800;
   color: #22345b;
   background: rgba(255, 255, 255, 0.82);
   box-shadow: inset 0 0 0 1px rgba(31, 47, 87, 0.08);
 }
 
-.app-nav a.router-link-active {
+.app-nav span {
+  opacity: 0.56;
+  cursor: default;
+}
+
+.app-nav a.is-current {
   color: #fff8f3;
   background: linear-gradient(135deg, #ff7a66 0%, #d84752 52%, #3e74f2 100%);
   box-shadow: 0 18px 28px rgba(193, 74, 74, 0.18);
 }
 
-.account {
+.header-actions {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
+.new-order,
+.logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 1.1rem;
+  border-radius: 16px;
+  font-weight: 800;
+}
+
+.new-order {
+  color: #fff8f3;
+  background: linear-gradient(135deg, #f3705f 0%, #d1494c 100%);
+  box-shadow: 0 16px 28px rgba(209, 73, 76, 0.2);
+}
+
+.divider {
+  width: 1px;
+  height: 38px;
+  background: rgba(31, 47, 87, 0.12);
+}
+
 .account-copy {
   display: grid;
   text-align: right;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #5a2e22;
+  background: linear-gradient(180deg, #fff3ed 0%, #f4d7c8 100%);
+  box-shadow: inset 0 0 0 1px rgba(187, 122, 101, 0.16);
 }
 
 .logout {
@@ -205,8 +268,9 @@ const logout = async () => {
     justify-content: flex-start;
   }
 
-  .account {
+  .header-actions {
     justify-content: space-between;
+    flex-wrap: wrap;
   }
 
   .account-copy {
@@ -229,14 +293,24 @@ const logout = async () => {
   }
 
   .app-nav,
-  .account {
+  .header-actions {
     flex-direction: column;
     align-items: stretch;
   }
 
   .app-nav a,
+  .app-nav span,
+  .new-order,
   .logout {
     width: 100%;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .avatar {
+    align-self: center;
   }
 }
 </style>

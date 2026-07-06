@@ -8,14 +8,15 @@
     <div class="login-shell">
       <aside class="showcase-panel">
         <div class="showcase-copy">
-          <span class="eyebrow">Convites tematicos</span>
+          <span class="eyebrow">Convites temáticos</span>
           <h1>Personalize o convite da sua festa com temas que combinam</h1>
           <p class="lede">
-            Convites com fontes e músicas temáticas para criar uma experiência completa para seus convidados.
+            Convites com fontes e músicas temáticas para criar uma experiência completa para seus
+            convidados.
           </p>
 
           <div class="theme-pills">
-            <span>Super-herois</span>
+            <span>Super-heróis</span>
             <span>Corrida</span>
             <span>Aventura</span>
             <span>Princesas</span>
@@ -34,12 +35,19 @@
           <article class="hero-card hero-card-ladybug">
             <div class="hero-copy">
               <strong>Encanto</strong>
-              <span>Composicoes delicadas e cheias de personalidade</span>
+              <span>Composições delicadas e cheias de personalidade</span>
             </div>
-            <img src="/login/ladybug.png" alt="Heroina de roupa vermelha com bolinhas" />
+            <img src="/login/ladybug.png" alt="Heroína de roupa vermelha com bolinhas" />
           </article>
 
           <div class="mini-strip">
+            <article v-for="theme in miniThemes" :key="theme.title" class="mini-card">
+              <img :src="theme.image" :alt="theme.alt" />
+              <div>
+                <strong>{{ theme.title }}</strong>
+                <span>{{ theme.caption }}</span>
+              </div>
+            </article>
           </div>
         </div>
       </aside>
@@ -48,19 +56,19 @@
         <div class="card-top">
           <span class="mini-badge">Acesso do cliente</span>
           <div class="spotlight">
-            <img src="/login/HomemAranha.png" alt="Homem Aranha na parede" />
+            <img src="/login/HomemAranha.png" alt="Homem-Aranha na parede" />
           </div>
         </div>
 
         <h2>Entre para montar os seus convites</h2>
         <p class="form-copy">
-         Crie você mesmo convites digitais com temas que combinam com a sua festa. Personalize fontes, cores e músicas para criar uma experiência completa para seus convidados.
-         
+          Crie você mesmo convites digitais com temas que combinam com a sua festa. Personalize
+          fontes, cores e músicas para criar uma experiência completa para seus convidados.
         </p>
 
         <div class="feature-band">
           <span>Arte personalizada</span>
-          <span>Pagamento rapido</span>
+          <span>Pagamento rápido</span>
           <span>Segurança de dados</span>
           <span>Entrega digital</span>
         </div>
@@ -103,7 +111,7 @@ const miniThemes = [
   },
   {
     title: 'Aventura',
-    caption: 'Hot Wheels com tracao e contraste forte',
+    caption: 'Hot Wheels com tração e contraste forte',
     image: '/login/hotwheels.png',
     alt: 'Carrinho off-road com tema Hot Wheels',
   },
@@ -115,9 +123,9 @@ const miniThemes = [
   },
   {
     title: 'Festa geek',
-    caption: 'Super-herois com cores vibrantes e energia',
+    caption: 'Super-heróis com cores vibrantes e energia',
     image: '/login/spiderman-cake.png',
-    alt: 'Heroi vermelho segurando bolo decorado',
+    alt: 'Herói vermelho segurando bolo decorado',
   },
 ];
 
@@ -312,7 +320,7 @@ async function submit() {
 .auth-card h2 {
   margin: 16px 0 0;
   line-height: 0.97;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Georgia, 'Times New Roman', serif;
 }
 
 .showcase-copy h1 {
@@ -390,7 +398,6 @@ async function submit() {
 
 .hero-card-sonic img {
   width: min(460px, 70%);
-
 }
 
 .hero-card-ladybug {
@@ -412,10 +419,6 @@ async function submit() {
   z-index: 1;
   display: grid;
   gap: 6px;
-  color: #fffdf9;
-}
-
-.hero-card-ladybug .hero-copy {
   color: #fffdf9;
 }
 
@@ -590,18 +593,6 @@ async function submit() {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes gradientDrift {
-  0% {
-    background-position: 0% 0%, 100% 50%, 50% 50%;
-  }
-  50% {
-    background-position: 18% 12%, 84% 44%, 54% 50%;
-  }
-  100% {
-    background-position: 10% 24%, 100% 62%, 46% 52%;
   }
 }
 
