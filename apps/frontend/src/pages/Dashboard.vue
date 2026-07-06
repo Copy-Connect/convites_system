@@ -1,1336 +1,292 @@
 <template>
-  <section class="dashboard-scene">
-    <div class="halo halo-coral" />
-    <div class="halo halo-blue" />
-    <div class="halo halo-gold" />
-
-    <div class="dashboard-shell">
-      <header class="hero-panel">
-        <div class="hero-copy">
-          <span class="eyebrow">Atelier de convites</span>
-          <h1>Pedido, PIX e liberacao do convite no mesmo painel.</h1>
-          <p class="hero-lede">
-            Escolha o tema, crie o pedido e acompanhe o pagamento sem sair do dashboard.
-            O painel ficou mais bonito, mais direto e pronto para fechar a compra na mesma
-            experiencia.
-          </p>
-
-          <div class="hero-actions">
-            <a class="primary-action" href="#order-composer">Criar pedido agora</a>
-            <button class="secondary-action" type="button" @click="focusLatestOrder">
-              Ver pedido ativo
-            </button>
-          </div>
-
-          <div class="hero-metrics">
-            <article>
-              <strong>{{ totalOrders }}</strong>
-              <span>pedidos no painel</span>
-            </article>
-            <article>
-              <strong>{{ paidOrders }}</strong>
-              <span>pagamentos concluidos</span>
-            </article>
-            <article>
-              <strong>{{ themeOptions.length }}</strong>
-              <span>temas em destaque</span>
-            </article>
-          </div>
-        </div>
-
-        <div class="hero-showcase">
-          <article
-            v-for="theme in featuredThemes"
-            :key="theme.slug"
-            class="showcase-card"
-            :style="{ '--theme-accent': theme.accent, '--theme-surface': theme.surface }"
-          >
-            <div class="showcase-copy">
-              <span>{{ theme.kicker }}</span>
-              <h2>{{ theme.title }}</h2>
-              <p>{{ theme.note }}</p>
-            </div>
-            <img :src="theme.image" :alt="theme.alt" />
-          </article>
-        </div>
-      </header>
-
-      <div class="workspace-grid">
-        <section id="order-composer" class="composer-card">
-          <div class="section-heading">
-            <div>
-              <span class="mini-eyebrow">Novo pedido</span>
-              <h2>Monte a experiencia da festa</h2>
-            </div>
-            <div class="price-badge">{{ formatMoney(currentAmountCents) }}</div>
-          </div>
-
-          <p class="section-copy">
-            Selecione o tema, preencha os dados principais e o sistema ja prepara a etapa de
-            pagamento via PIX no mesmo fluxo.
-          </p>
-
-          <div class="theme-grid">
-            <button
-              v-for="theme in themeOptions"
-              :key="theme.slug"
-              type="button"
-              class="theme-card"
-              :class="{ selected: form.themeSlug === theme.slug }"
-              :style="{ '--theme-accent': theme.accent, '--theme-surface': theme.surface }"
-              @click="form.themeSlug = theme.slug"
-            >
-              <span class="theme-badge">{{ theme.kicker }}</span>
-              <img :src="theme.image" :alt="theme.alt" />
-              <strong>{{ theme.title }}</strong>
-              <span>{{ theme.tagline }}</span>
-            </button>
-          </div>
-
-          <form class="order-form" @submit.prevent="submitOrder">
-            <div class="field-grid">
-              <label class="field">
-                <span>Nome da crianca</span>
-                <input v-model="form.name" placeholder="Ex.: Helena" required />
-              </label>
-
-              <label class="field">
-                <span>Idade</span>
-                <input v-model.number="form.age" type="number" min="0" max="15" required />
-              </label>
-            </div>
-
-            <label class="field">
-              <span>Endereco ou referencia</span>
-              <textarea
-                v-model="form.address"
-                rows="4"
-                placeholder="Rua, bairro, cidade ou uma referencia importante"
-                required
-              />
-            </label>
-
-            <div class="checkout-strip">
-              <div>
-                <strong>Pagamento via PIX</strong>
-                <span>Depois de criar o pedido, a cobranca pode ser gerada imediatamente.</span>
-              </div>
-              <span class="checkout-chip">PIX imediato</span>
-            </div>
-
-            <button class="submit-order" :disabled="submittingOrder || paymentBusy">
-              {{ submittingOrder ? 'Criando pedido...' : 'Criar pedido e iniciar pagamento' }}
-            </button>
-
-            <p v-if="formError" class="feedback error">{{ formError }}</p>
-          </form>
-        </section>
-
-        <aside class="control-rail">
-          <article
-            class="summary-card"
-            :style="{
-              '--theme-accent': currentTheme.accent,
-              '--theme-surface': currentTheme.surface,
-            }"
-          >
-            <div class="summary-visual">
-              <img :src="currentTheme.image" :alt="currentTheme.alt" />
-            </div>
-            <div>
-              <span class="mini-eyebrow">Tema selecionado</span>
-              <h3>{{ currentTheme.title }}</h3>
-              <p>{{ currentTheme.note }}</p>
-            </div>
-
-            <div class="summary-points">
-              <span>Recorte premium</span>
-              <span>Visual de impacto</span>
-              <span>Fluxo rapido de compra</span>
-            </div>
-          </article>
-
-          <article class="payment-card">
-            <div v-if="activeOrder" class="payment-head">
-              <div>
-                <span class="mini-eyebrow">Pedido ativo</span>
-                <h3>{{ activeOrder.name }}</h3>
-                <p>{{ activeThemeTitle }} • {{ formatDate(activeOrder.createdAt) }}</p>
-              </div>
-              <span class="status-pill" :class="statusClass(paymentStatus)">
-                {{ labelStatus(paymentStatus) }}
-              </span>
-            </div>
-
-            <div v-else class="payment-empty">
-              <span class="mini-eyebrow">Pedido ativo</span>
-              <h3>Nenhum pedido selecionado</h3>
-              <p>Crie um pedido ou selecione um dos cards abaixo para abrir o pagamento.</p>
-            </div>
-
-            <div class="step-list">
-              <div class="step" :class="{ done: !!activeOrder }">
-                <strong>1</strong>
-                <span>Pedido criado</span>
-              </div>
-              <div class="step" :class="{ done: !!payment }">
-                <strong>2</strong>
-                <span>PIX gerado</span>
-              </div>
-              <div class="step" :class="{ done: paymentStatus === 'PAID' }">
-                <strong>3</strong>
-                <span>Pagamento aprovado</span>
-              </div>
-            </div>
-
-            <div v-if="activeOrder" class="payment-body">
-              <div class="detail-line">
-                <span>Total previsto</span>
-                <strong>{{ formatMoney(activeOrder.amountCents) }}</strong>
-              </div>
-              <div class="detail-line">
-                <span>Status do pedido</span>
-                <strong>{{ labelStatus(activeOrder.status) }}</strong>
-              </div>
-
-              <button
-                v-if="!payment"
-                class="primary-panel-action"
-                type="button"
-                :disabled="paymentBusy"
-                @click="createPixForActiveOrder"
-              >
-                {{ paymentBusy ? 'Gerando PIX...' : 'Gerar pagamento PIX' }}
-              </button>
-
-              <div v-else class="payment-box">
-                <div class="detail-line">
-                  <span>Transacao</span>
-                  <strong>{{ payment.transactionId || payment.id }}</strong>
-                </div>
-                <div class="detail-line">
-                  <span>Status PIX</span>
-                  <strong>{{ labelStatus(payment.status) }}</strong>
-                </div>
-
-                <img
-                  v-if="payment.qrCodeUrl"
-                  class="qr-preview"
-                  :src="payment.qrCodeUrl"
-                  alt="QR Code do pagamento PIX"
-                />
-
-                <div class="payment-links">
-                  <a
-                    v-if="payment.checkoutUrl"
-                    :href="payment.checkoutUrl"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    Abrir checkout
-                  </a>
-                  <a
-                    v-if="payment.qrCodeUrl"
-                    :href="payment.qrCodeUrl"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    Abrir QR Code
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <p v-if="panelError" class="feedback error">{{ panelError }}</p>
-          </article>
-
-          <article class="invite-card">
-            <div>
-              <span class="mini-eyebrow">Entrega final</span>
-              <h3>Liberacao do convite</h3>
-              <p>
-                Quando o pagamento estiver aprovado, a geracao final do convite pode ser feita
-                daqui mesmo.
-              </p>
-            </div>
-
-            <button
-              class="secondary-panel-action"
-              type="button"
-              :disabled="!activeOrder || paymentStatus !== 'PAID' || inviteBusy"
-              @click="generateInvite"
-            >
-              {{ inviteBusy ? 'Gerando convite...' : 'Gerar convite final' }}
-            </button>
-
-            <a
-              v-if="invitePath"
-              class="invite-link"
-              :href="apiBase + invitePath"
-              target="_blank"
-              rel="noopener"
-            >
-              Abrir convite gerado
-            </a>
-          </article>
-        </aside>
+  <section class="dashboard-page">
+    <header class="hero-card">
+      <div class="hero-copy">
+        <span class="eyebrow">Visão geral</span>
+        <h1>Olá, bem-vindo ao seu painel</h1>
+        <p>
+          Acompanhe seus pedidos, gerencie temas e garanta que cada festa tenha um fluxo claro
+          desde a criação até a entrega.
+        </p>
       </div>
 
-      <section class="orders-panel">
-        <div class="section-heading section-heading-inline">
-          <div>
-            <span class="mini-eyebrow">Pedidos recentes</span>
-            <h2>Historico no mesmo painel</h2>
-          </div>
-          <RouterLink class="inline-link" to="/orders/new">Fluxo classico</RouterLink>
+      <div class="hero-actions">
+        <RouterLink class="primary-button" :to="{ name: 'orders-new' }">
+          Criar novo pedido
+        </RouterLink>
+        <RouterLink class="secondary-button" :to="{ name: 'orders-index' }">
+          Ver pedidos
+        </RouterLink>
+      </div>
+    </header>
+
+    <p v-if="error" class="feedback error">{{ error }}</p>
+
+    <section class="metrics-grid">
+      <article class="metric-card metric-card-sand">
+        <span class="metric-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M8 7h8m-8 5h8m-8 5h5M7 3h10a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V5a2 2 0 0 1 2-2Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+            />
+          </svg>
+        </span>
+        <div>
+          <strong>{{ activeOrdersCount }}</strong>
+          <span>Pedidos ativos</span>
+          <small>Em produção após a confirmação do pagamento.</small>
         </div>
+      </article>
 
-        <p v-if="loadingOrders" class="panel-note">Carregando pedidos...</p>
-        <p v-else-if="!orders.length" class="panel-note">
-          Seu primeiro pedido vai aparecer aqui assim que for criado.
-        </p>
-
-        <div v-else class="orders-grid">
-          <article
-            v-for="order in orders"
-            :key="order.id"
-            class="order-card"
-            :class="{ active: order.id === activeOrder?.id }"
-          >
-            <button class="order-select" type="button" @click="selectOrder(order.id!)">
-              <div>
-                <strong>{{ order.name }}</strong>
-                <p>{{ resolveThemeLabel(order) }}</p>
-              </div>
-              <span>{{ formatMoney(order.amountCents) }}</span>
-            </button>
-
-            <div class="order-meta">
-              <span>{{ formatDate(order.createdAt) }}</span>
-              <span class="status-pill" :class="statusClass(order.paymentStatus || order.status)">
-                {{ labelStatus(order.paymentStatus || order.status) }}
-              </span>
-            </div>
-
-            <div class="order-links">
-              <RouterLink :to="{ name: 'orders-show', params: { id: order.id } }">
-                Ver detalhes
-              </RouterLink>
-              <button type="button" @click="selectOrder(order.id!)">Abrir no painel</button>
-            </div>
-          </article>
+      <article class="metric-card metric-card-rose">
+        <span class="metric-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 3v18m-7-8h14M7 7h10a2 2 0 0 1 2 2v6a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5V9a2 2 0 0 1 2-2Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+            />
+          </svg>
+        </span>
+        <div>
+          <strong>{{ pendingPaymentsCount }}</strong>
+          <span>Pagamentos pendentes</span>
+          <small>Aguardando PIX ou confirmação do gateway.</small>
         </div>
-      </section>
-    </div>
+      </article>
+
+      <article class="metric-card metric-card-blue">
+        <span class="metric-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="m7 12 3 3 7-7M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+            />
+          </svg>
+        </span>
+        <div>
+          <strong>{{ completedOrdersCount }}</strong>
+          <span>Total concluído</span>
+          <small>Pedidos com convite já gerado no sistema.</small>
+        </div>
+      </article>
+    </section>
+
+    <section class="history-card">
+      <div class="section-header">
+        <div>
+          <h2>Histórico no mesmo painel</h2>
+          <p>Últimos pedidos criados no sistema.</p>
+        </div>
+        <RouterLink class="section-link" :to="{ name: 'orders-index' }">Ver todos</RouterLink>
+      </div>
+
+      <div v-if="loading" class="table-state">Carregando pedidos...</div>
+      <div v-else-if="!recentOrders.length" class="table-state empty-state">
+        Seu primeiro pedido aparecerá aqui assim que for criado.
+      </div>
+
+      <div v-else class="table-wrapper">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Criança / pedido</th>
+              <th>Tema</th>
+              <th>Status</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="order in recentOrders" :key="order.id">
+              <td>
+                <RouterLink class="child-link" :to="{ name: 'orders-show', params: { id: order.id } }">
+                  {{ order.name }}
+                </RouterLink>
+                <small>{{ getOrderCode(order) }}</small>
+              </td>
+              <td>
+                <div class="theme-cell">
+                  <span class="theme-badge">{{ getThemeInitial(order) }}</span>
+                  <span>{{ getOrderThemeLabel(order) }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill" :class="getOrderStatusClass(order)">
+                  {{ getOrderStatusLabel(order) }}
+                </span>
+              </td>
+              <td>{{ formatDate(order.createdAt) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import type { Order } from '@/models/Order';
 import { OrdersService } from '@/services/OrdersService';
-import { PaymentsService } from '@/services/PaymentsService';
-
-type ThemeOption = {
-  slug: string;
-  title: string;
-  kicker: string;
-  tagline: string;
-  note: string;
-  alt: string;
-  image: string;
-  accent: string;
-  surface: string;
-};
-
-type PaymentState = {
-  id: string;
-  status: string;
-  transactionId?: string | null;
-  qrCodeUrl?: string | null;
-  checkoutUrl?: string | null;
-};
-
-const apiBase =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? 'http://localhost:3000' : window.location.origin);
-
-const themeOptions: ThemeOption[] = [
-  {
-    slug: 'snow-white-cake',
-    title: 'Princesa com bolo cenico',
-    kicker: 'Encanto',
-    tagline: 'Leveza romantica com foco no bolo tematico.',
-    note: 'Ideal para festas delicadas com clima premium e acabamento doce.',
-    alt: 'Princesa com lacinho vermelho segurando um bolo com morangos',
-    image: '/dashboard/snow-white-cake.png',
-    accent: '#d84d4b',
-    surface: 'linear-gradient(180deg, rgba(255, 247, 247, 0.98) 0%, rgba(255, 232, 228, 0.92) 100%)',
-  },
-  {
-    slug: 'spider-hero',
-    title: 'Heroi urbano',
-    kicker: 'Impacto',
-    tagline: 'Visual dinamico para aniversarios cheios de energia.',
-    note: 'Uma direcao mais vibrante para familias que querem cor e movimento.',
-    alt: 'Heroi vermelho e azul em pose de salto',
-    image: '/dashboard/spider-hero.png',
-    accent: '#2a5bdf',
-    surface: 'linear-gradient(180deg, rgba(239, 246, 255, 0.98) 0%, rgba(220, 233, 255, 0.92) 100%)',
-  },
-  {
-    slug: 'inside-out-trio',
-    title: 'Emocoes divertidas',
-    kicker: 'Narrativa',
-    tagline: 'Composicao colorida para festas com humor e expressao.',
-    note: 'Funciona muito bem para uma identidade visual mais moderna e ludica.',
-    alt: 'Tres personagens coloridos em composicao divertida',
-    image: '/dashboard/inside-out-trio.png',
-    accent: '#ee8d2d',
-    surface: 'linear-gradient(180deg, rgba(255, 250, 236, 0.98) 0%, rgba(255, 239, 209, 0.92) 100%)',
-  },
-  {
-    slug: 'shrek-donkey',
-    title: 'Aventura irreverente',
-    kicker: 'Humor',
-    tagline: 'Tema marcante para quem quer uma festa divertida e memoravel.',
-    note: 'Boa escolha para um painel com energia, carisma e personalidade forte.',
-    alt: 'Personagem verde montado em um burro correndo',
-    image: '/dashboard/shrek-donkey.png',
-    accent: '#5b9646',
-    surface: 'linear-gradient(180deg, rgba(244, 252, 236, 0.98) 0%, rgba(223, 244, 212, 0.92) 100%)',
-  },
-];
-
-const form = reactive({
-  name: '',
-  age: 6,
-  address: '',
-  themeSlug: themeOptions[0].slug,
-});
+import {
+  formatDate,
+  getOrderCode,
+  getOrderStatusClass,
+  getOrderStatusLabel,
+  getOrderThemeLabel,
+  resolveOrderUiState,
+} from '@/utils/orderPresentation';
 
 const orders = ref<Order[]>([]);
-const activeOrder = ref<Order | null>(null);
-const payment = ref<PaymentState | null>(null);
-const paymentStatus = ref('PENDING');
-const loadingOrders = ref(true);
-const submittingOrder = ref(false);
-const paymentBusy = ref(false);
-const inviteBusy = ref(false);
-const formError = ref('');
-const panelError = ref('');
-const invitePath = ref('');
-let timer: number | undefined;
+const loading = ref(true);
+const error = ref('');
 
-const featuredThemes = computed(() => themeOptions.slice(0, 3));
-const currentTheme = computed(
-  () => themeOptions.find((theme) => theme.slug === form.themeSlug) || themeOptions[0],
+const recentOrders = computed(() => orders.value.slice(0, 5));
+const activeOrdersCount = computed(
+  () => orders.value.filter((order) => resolveOrderUiState(order) === 'in_progress').length,
 );
-const currentAmountCents = computed(() => activeOrder.value?.amountCents ?? 1990);
-const totalOrders = computed(() => orders.value.length);
-const paidOrders = computed(
-  () => orders.value.filter((order) => order.paymentStatus === 'PAID' || order.status === 'PAID').length,
+const pendingPaymentsCount = computed(
+  () => orders.value.filter((order) => resolveOrderUiState(order) === 'pending_payment').length,
 );
-const activeThemeTitle = computed(() => {
-  if (!activeOrder.value) {
-    return currentTheme.value.title;
-  }
+const completedOrdersCount = computed(
+  () => orders.value.filter((order) => resolveOrderUiState(order) === 'completed').length,
+);
 
-  return resolveThemeLabel(activeOrder.value);
-});
-
-function sortOrders(list: Order[]) {
-  return [...list].sort((left, right) => {
-    const rightTime = new Date(right.createdAt || right.updatedAt || 0).getTime();
-    const leftTime = new Date(left.createdAt || left.updatedAt || 0).getTime();
-    return rightTime - leftTime;
-  });
+function getThemeInitial(order: Order) {
+  return getOrderThemeLabel(order).charAt(0).toUpperCase();
 }
 
-function syncOrder(order: Order) {
-  const index = orders.value.findIndex((item) => item.id === order.id);
-  if (index >= 0) {
-    orders.value[index] = order;
-    orders.value = sortOrders(orders.value);
-    return;
-  }
+async function loadOrders() {
+  loading.value = true;
+  error.value = '';
 
-  orders.value = sortOrders([order, ...orders.value]);
-}
-
-function resolveThemeLabel(order: Order) {
-  const theme = themeOptions.find((item) => item.slug === order.themeSlug);
-  return order.themeName || theme?.title || order.themeSlug || 'Tema personalizado';
-}
-
-function labelStatus(status?: string | null) {
-  switch (status) {
-    case 'PAID':
-      return 'Pago';
-    case 'GENERATED':
-      return 'Convite pronto';
-    case 'FAILED':
-      return 'Falha no pagamento';
-    case 'CANCELED':
-      return 'Cancelado';
-    default:
-      return 'Em andamento';
-  }
-}
-
-function statusClass(status?: string | null) {
-  if (status === 'PAID' || status === 'GENERATED') {
-    return 'is-paid';
-  }
-
-  if (status === 'FAILED' || status === 'CANCELED') {
-    return 'is-failed';
-  }
-
-  return 'is-pending';
-}
-
-function formatMoney(amountCents?: number | null) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format((amountCents ?? 1990) / 100);
-}
-
-function formatDate(value?: string) {
-  if (!value) {
-    return 'Agora';
-  }
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(new Date(value));
-}
-
-function stopPolling() {
-  if (timer) {
-    clearInterval(timer);
-    timer = undefined;
-  }
-}
-
-function startPolling() {
-  if (timer || paymentStatus.value !== 'PENDING' || !activeOrder.value?.id) {
-    return;
-  }
-
-  timer = window.setInterval(async () => {
-    if (paymentBusy.value || inviteBusy.value || submittingOrder.value) {
-      return;
-    }
-
-    await refreshPaymentState(false);
-    if (paymentStatus.value !== 'PENDING') {
-      stopPolling();
-    }
-  }, 4000);
-}
-
-async function refreshOrders() {
-  loadingOrders.value = true;
   try {
-    orders.value = sortOrders(await OrdersService.list());
+    orders.value = await OrdersService.list();
+  } catch (requestError: any) {
+    error.value =
+      requestError?.response?.data?.message ||
+      requestError?.message ||
+      'Não foi possível carregar os pedidos do painel.';
   } finally {
-    loadingOrders.value = false;
+    loading.value = false;
   }
 }
 
-async function refreshActiveOrder(id = activeOrder.value?.id) {
-  if (!id) {
-    return;
-  }
-
-  const fresh = await OrdersService.get(id);
-  activeOrder.value = fresh;
-  syncOrder(fresh);
-
-  if (fresh.paymentStatus) {
-    paymentStatus.value = fresh.paymentStatus;
-    if (!payment.value) {
-      payment.value = {
-        id,
-        status: fresh.paymentStatus,
-      };
-    }
-  }
-}
-
-async function refreshPaymentState(allowStart = true) {
-  if (!activeOrder.value?.id) {
-    return;
-  }
-
-  try {
-    const status = await PaymentsService.getStatusByOrder(activeOrder.value.id);
-    if (status) {
-      payment.value = {
-        ...(payment.value || {}),
-        id: status.id,
-        status: status.status,
-        transactionId: status.transactionId,
-      };
-      paymentStatus.value = status.status;
-    }
-  } catch {}
-
-  await refreshActiveOrder(activeOrder.value.id);
-
-  if (allowStart && paymentStatus.value === 'PENDING' && payment.value) {
-    startPolling();
-  }
-}
-
-async function selectOrder(id: string) {
-  stopPolling();
-  panelError.value = '';
-  invitePath.value = '';
-
-  try {
-    payment.value = null;
-    activeOrder.value = await OrdersService.get(id);
-    paymentStatus.value = activeOrder.value.paymentStatus || 'PENDING';
-    syncOrder(activeOrder.value);
-    await refreshPaymentState();
-  } catch (error: any) {
-    panelError.value =
-      error?.response?.data?.message || error?.message || 'Nao foi possivel carregar o pedido';
-  }
-}
-
-async function createPixForOrder(orderId: string, amountCents?: number | null) {
-  paymentBusy.value = true;
-  panelError.value = '';
-
-  try {
-    payment.value = await PaymentsService.createPix(orderId, amountCents ?? 1990);
-    paymentStatus.value = payment.value.status;
-    await refreshActiveOrder(orderId);
-    startPolling();
-  } catch (error: any) {
-    panelError.value =
-      error?.response?.data?.message || error?.message || 'Erro ao gerar o pagamento PIX';
-  } finally {
-    paymentBusy.value = false;
-  }
-}
-
-async function createPixForActiveOrder() {
-  if (!activeOrder.value?.id) {
-    return;
-  }
-
-  await createPixForOrder(activeOrder.value.id, activeOrder.value.amountCents);
-}
-
-async function submitOrder() {
-  submittingOrder.value = true;
-  formError.value = '';
-  invitePath.value = '';
-
-  try {
-    const order = await OrdersService.create({
-      name: form.name,
-      age: Number(form.age),
-      address: form.address,
-      themeSlug: form.themeSlug,
-    });
-
-    syncOrder(order);
-    await selectOrder(String(order.id));
-    await createPixForOrder(String(order.id), order.amountCents);
-
-    form.name = '';
-    form.age = 6;
-    form.address = '';
-  } catch (error: any) {
-    formError.value =
-      error?.response?.data?.message || error?.message || 'Erro ao criar o pedido';
-  } finally {
-    submittingOrder.value = false;
-  }
-}
-
-async function generateInvite() {
-  if (!activeOrder.value?.id) {
-    return;
-  }
-
-  inviteBusy.value = true;
-  panelError.value = '';
-
-  try {
-    const invite = await OrdersService.generateInvite(activeOrder.value.id);
-    invitePath.value = invite.path;
-    await refreshActiveOrder(activeOrder.value.id);
-  } catch (error: any) {
-    panelError.value =
-      error?.response?.data?.message || error?.message || 'Erro ao gerar o convite';
-  } finally {
-    inviteBusy.value = false;
-  }
-}
-
-function focusLatestOrder() {
-  const latestOrderId = orders.value[0]?.id;
-  if (latestOrderId) {
-    void selectOrder(String(latestOrderId));
-    return;
-  }
-
-  document.getElementById('order-composer')?.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start',
-  });
-}
-
-onMounted(async () => {
-  await refreshOrders();
-  if (orders.value[0]?.id) {
-    await selectOrder(String(orders.value[0].id));
-  }
-});
-
-onUnmounted(() => {
-  stopPolling();
+onMounted(() => {
+  void loadOrders();
 });
 </script>
 
 <style scoped>
-.dashboard-scene {
-  position: relative;
-  overflow: hidden;
-  padding: 20px 0 36px;
-}
-
-.halo {
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(28px);
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.halo-coral {
-  top: 18px;
-  right: -60px;
-  width: 240px;
-  height: 240px;
-  background: rgba(255, 120, 106, 0.22);
-}
-
-.halo-blue {
-  left: -80px;
-  top: 280px;
-  width: 260px;
-  height: 260px;
-  background: rgba(74, 126, 255, 0.18);
-}
-
-.halo-gold {
-  right: 14%;
-  bottom: 10px;
-  width: 280px;
-  height: 280px;
-  background: rgba(255, 196, 86, 0.18);
-}
-
-.dashboard-shell {
-  position: relative;
-  z-index: 1;
+.dashboard-page {
   display: grid;
   gap: 24px;
 }
 
-.hero-panel,
-.composer-card,
-.summary-card,
-.payment-card,
-.invite-card,
-.orders-panel {
+.hero-card,
+.metric-card,
+.history-card {
   border: 1px solid rgba(255, 255, 255, 0.62);
-  border-radius: 32px;
-  background: rgba(255, 251, 247, 0.74);
-  box-shadow: 0 28px 60px rgba(31, 45, 82, 0.14);
-  backdrop-filter: blur(18px);
+  border-radius: 28px;
+  background: rgba(255, 251, 247, 0.78);
+  box-shadow: 0 28px 60px rgba(31, 45, 82, 0.12);
+  backdrop-filter: blur(16px);
 }
 
-.hero-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.95fr);
-  gap: 22px;
-  padding: 30px;
-}
-
-.eyebrow,
-.mini-eyebrow,
-.theme-badge,
-.checkout-chip,
-.status-pill {
-  display: inline-flex;
+.hero-card {
+  display: flex;
   align-items: center;
-  width: fit-content;
-  border-radius: 999px;
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.eyebrow,
-.mini-eyebrow {
-  padding: 0.62rem 0.92rem;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 40px;
 }
 
 .eyebrow {
-  color: #20375e;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 12px 24px rgba(32, 47, 95, 0.12);
-}
-
-.hero-copy h1,
-.section-heading h2,
-.payment-head h3,
-.payment-empty h3,
-.invite-card h3,
-.summary-card h3,
-.showcase-card h2 {
-  margin: 0;
-  font-family: Georgia, 'Times New Roman', serif;
-  line-height: 0.98;
-  color: #1a2848;
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.56rem 0.88rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c25540;
+  background: rgba(255, 118, 92, 0.12);
 }
 
 .hero-copy {
   display: grid;
-  gap: 18px;
-  align-content: center;
+  gap: 16px;
+  max-width: 720px;
+}
+
+.hero-copy h1,
+.section-header h2 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #17284a;
 }
 
 .hero-copy h1 {
-  max-width: 11ch;
-  font-size: clamp(3.1rem, 5vw, 5.3rem);
+  font-size: clamp(2.8rem, 5vw, 4rem);
+  line-height: 0.98;
 }
 
-.hero-lede,
-.section-copy,
-.payment-head p,
-.payment-empty p,
-.invite-card p,
-.summary-card p,
-.showcase-card p,
-.panel-note,
-.field span,
-.checkout-strip span {
-  color: #5b6883;
-}
-
-.hero-lede {
-  max-width: 58ch;
+.hero-copy p,
+.section-header p,
+.table-state,
+.metric-card small {
   margin: 0;
-  font-size: 1.04rem;
-  line-height: 1.72;
+  line-height: 1.7;
+  color: #62708b;
 }
 
 .hero-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 12px;
+  min-width: 250px;
 }
 
-.primary-action,
-.secondary-action,
-.submit-order,
-.primary-panel-action,
-.secondary-panel-action,
-.order-links button {
-  min-height: 54px;
-  padding: 0 1.3rem;
-  border-radius: 18px;
-  font-weight: 800;
-  transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
-}
-
-.primary-action,
-.submit-order,
-.primary-panel-action {
+.primary-button,
+.secondary-button,
+.section-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #fffaf6;
-  background: linear-gradient(135deg, #ff7a66 0%, #d84752 52%, #3e74f2 100%);
-  box-shadow: 0 20px 34px rgba(193, 74, 74, 0.26);
-}
-
-.secondary-action,
-.secondary-panel-action,
-.order-links button {
-  color: #23345a;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: inset 0 0 0 1px rgba(33, 50, 90, 0.08);
-}
-
-.primary-action:hover,
-.secondary-action:hover,
-.submit-order:hover,
-.primary-panel-action:hover,
-.secondary-panel-action:hover,
-.order-links button:hover {
-  transform: translateY(-2px);
-}
-
-.secondary-action,
-.primary-action {
+  min-height: 52px;
+  padding: 0 1.2rem;
+  border-radius: 18px;
+  font-weight: 800;
   text-decoration: none;
 }
 
-.hero-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.hero-metrics article {
-  padding: 16px 18px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(24, 41, 78, 0.06);
-}
-
-.hero-metrics strong,
-.price-badge,
-.detail-line strong,
-.order-select span {
-  display: block;
-  color: #1a2848;
-}
-
-.hero-metrics strong {
-  font-size: 1.55rem;
-}
-
-.hero-metrics span {
-  margin-top: 4px;
-  color: #61708d;
-}
-
-.hero-showcase {
-  display: grid;
-  gap: 16px;
-}
-
-.showcase-card {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 152px;
-  gap: 14px;
-  align-items: center;
-  min-height: 182px;
-  padding: 18px;
-  overflow: hidden;
-  border-radius: 28px;
-  background: var(--theme-surface);
-}
-
-.showcase-card::after,
-.summary-card::after {
-  content: '';
-  position: absolute;
-  inset: auto -30px -30px auto;
-  width: 120px;
-  height: 120px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--theme-accent) 18%, transparent);
-  pointer-events: none;
-}
-
-.showcase-copy {
-  position: relative;
-  z-index: 1;
-}
-
-.showcase-copy span {
-  color: var(--theme-accent);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.showcase-copy h2 {
-  margin-top: 10px;
-  font-size: 1.8rem;
-}
-
-.showcase-copy p {
-  margin: 10px 0 0;
-  line-height: 1.55;
-}
-
-.showcase-card img,
-.summary-visual img,
-.theme-card img {
-  width: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 16px 24px rgba(20, 34, 68, 0.16));
-}
-
-.showcase-card img {
-  align-self: end;
-  max-height: 170px;
-}
-
-.workspace-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.78fr);
-  gap: 24px;
-  align-items: start;
-}
-
-.composer-card,
-.orders-panel {
-  padding: 28px;
-}
-
-.section-heading {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.section-heading h2 {
-  margin-top: 10px;
-  font-size: clamp(2rem, 3.2vw, 2.85rem);
-}
-
-.price-badge {
-  padding: 0.95rem 1.15rem;
-  border-radius: 20px;
-  font-size: 1.05rem;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: inset 0 0 0 1px rgba(31, 46, 84, 0.06);
-}
-
-.section-copy {
-  max-width: 62ch;
-  margin: 14px 0 0;
-  line-height: 1.7;
-}
-
-.theme-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.theme-card {
-  position: relative;
-  display: grid;
-  gap: 10px;
-  padding: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.58);
-  border-radius: 28px;
-  text-align: left;
-  background: var(--theme-surface);
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
-}
-
-.theme-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 40px rgba(31, 45, 82, 0.12);
-}
-
-.theme-card.selected {
-  border-color: color-mix(in srgb, var(--theme-accent) 44%, white);
-  box-shadow:
-    0 24px 42px rgba(31, 45, 82, 0.14),
-    inset 0 0 0 1px color-mix(in srgb, var(--theme-accent) 24%, transparent);
-}
-
-.theme-badge {
-  padding: 0.52rem 0.8rem;
-  color: var(--theme-accent);
-  background: rgba(255, 255, 255, 0.82);
-}
-
-.theme-card img {
-  height: 170px;
-}
-
-.theme-card strong {
-  color: #1c2b49;
-  font-size: 1.08rem;
-}
-
-.theme-card span:last-child {
-  line-height: 1.55;
-  color: #5c6782;
-}
-
-.order-form {
-  display: grid;
-  gap: 18px;
-  margin-top: 26px;
-}
-
-.field-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.field {
-  display: grid;
-  gap: 8px;
-}
-
-.field span {
-  font-size: 0.92rem;
-  font-weight: 800;
-  color: #334261;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 118px;
-}
-
-.checkout-strip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 18px;
-  border-radius: 24px;
-  background: rgba(255, 244, 234, 0.88);
-  box-shadow: inset 0 0 0 1px rgba(219, 103, 74, 0.08);
-}
-
-.checkout-strip strong {
-  display: block;
-  color: #23345a;
-}
-
-.checkout-strip span {
-  display: block;
-  margin-top: 4px;
-}
-
-.checkout-chip {
-  padding: 0.58rem 0.82rem;
-  color: #d65a3f;
-  background: rgba(255, 255, 255, 0.82);
-}
-
-.submit-order:disabled,
-.primary-panel-action:disabled,
-.secondary-panel-action:disabled {
-  opacity: 0.68;
-  cursor: wait;
-}
-
-.control-rail {
-  display: grid;
-  gap: 18px;
-}
-
-.summary-card,
-.payment-card,
-.invite-card {
-  position: relative;
-  padding: 24px;
-  overflow: hidden;
-}
-
-.summary-card {
-  display: grid;
-  gap: 18px;
-  background: var(--theme-surface);
-}
-
-.summary-visual {
-  display: grid;
-  place-items: center;
-  min-height: 220px;
-  padding: 16px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.6);
-}
-
-.summary-visual img {
-  max-width: 260px;
-  max-height: 240px;
-}
-
-.summary-card h3,
-.payment-head h3,
-.payment-empty h3,
-.invite-card h3 {
-  margin-top: 10px;
-  font-size: 1.9rem;
-}
-
-.summary-card p,
-.payment-head p,
-.payment-empty p,
-.invite-card p {
-  margin: 10px 0 0;
-  line-height: 1.65;
-}
-
-.summary-points {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.summary-points span,
-.payment-links a,
-.invite-link,
-.inline-link,
-.order-links a {
-  color: #20355d;
-}
-
-.summary-points span {
-  padding: 0.72rem 0.9rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.74);
-  box-shadow: inset 0 0 0 1px rgba(27, 42, 75, 0.06);
-}
-
-.payment-card {
-  display: grid;
-  gap: 18px;
-}
-
-.payment-head,
-.payment-empty {
-  display: grid;
-  gap: 12px;
-}
-
-.mini-eyebrow {
-  color: #d55d45;
-  background: rgba(255, 118, 92, 0.12);
-}
-
-.status-pill {
-  padding: 0.6rem 0.8rem;
-  letter-spacing: 0.08em;
-}
-
-.is-paid {
-  color: #1d6d43;
-  background: rgba(113, 214, 155, 0.18);
-}
-
-.is-pending {
-  color: #8a5a16;
-  background: rgba(255, 202, 96, 0.18);
-}
-
-.is-failed {
-  color: #a42f2b;
-  background: rgba(255, 118, 106, 0.16);
-}
-
-.step-list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.step {
-  display: grid;
-  gap: 10px;
-  padding: 14px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.74);
-  box-shadow: inset 0 0 0 1px rgba(26, 36, 64, 0.06);
-}
-
-.step strong {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  color: #20355d;
-  background: rgba(242, 231, 214, 0.95);
-}
-
-.step span {
-  color: #5a6682;
-  line-height: 1.45;
-}
-
-.step.done strong {
+.primary-button {
   color: #fff9f4;
-  background: linear-gradient(135deg, #ff7a66 0%, #3e74f2 100%);
+  background: linear-gradient(135deg, #f36f5d 0%, #c4473d 100%);
+  box-shadow: 0 18px 30px rgba(196, 71, 61, 0.2);
 }
 
-.payment-body {
-  display: grid;
-  gap: 14px;
-}
-
-.detail-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  color: #5b6883;
-}
-
-.payment-box {
-  display: grid;
-  gap: 14px;
-  padding: 16px;
-  border-radius: 24px;
-  background: rgba(246, 238, 229, 0.92);
-}
-
-.qr-preview {
-  width: 100%;
-  max-width: 220px;
-  padding: 12px;
-  border-radius: 22px;
+.secondary-button {
+  color: #20345d;
   background: rgba(255, 255, 255, 0.88);
-}
-
-.payment-links,
-.order-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.payment-links a,
-.invite-link,
-.inline-link,
-.order-links a,
-.order-links button {
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.invite-card {
-  display: grid;
-  gap: 18px;
+  box-shadow: inset 0 0 0 1px rgba(31, 47, 87, 0.08);
 }
 
 .feedback {
   margin: 0;
-  padding: 0.92rem 1rem;
+  padding: 0.95rem 1rem;
   border-radius: 18px;
 }
 
@@ -1339,144 +295,239 @@ textarea {
   background: rgba(216, 78, 56, 0.12);
 }
 
-.orders-panel {
-  display: grid;
-  gap: 18px;
-}
-
-.section-heading-inline {
-  align-items: center;
-}
-
-.panel-note {
-  margin: 0;
-  line-height: 1.6;
-}
-
-.orders-grid {
+.metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 
-.order-card {
-  display: grid;
-  gap: 16px;
-  padding: 18px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(28, 42, 77, 0.08);
-}
-
-.order-card.active {
-  box-shadow:
-    0 24px 42px rgba(31, 45, 82, 0.14),
-    inset 0 0 0 1px rgba(62, 116, 242, 0.18);
-}
-
-.order-select {
+.metric-card {
+  position: relative;
   display: flex;
-  align-items: start;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.metric-card::after {
+  content: '';
+  position: absolute;
+  top: -22px;
+  right: -18px;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  opacity: 0.8;
+}
+
+.metric-card-sand::after {
+  background: rgba(246, 228, 195, 0.7);
+}
+
+.metric-card-rose::after {
+  background: rgba(248, 205, 204, 0.82);
+}
+
+.metric-card-blue::after {
+  background: rgba(223, 231, 255, 0.88);
+}
+
+.metric-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  color: #26385e;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.metric-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.metric-card div {
+  position: relative;
+  z-index: 1;
+}
+
+.metric-card strong {
+  display: block;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2rem;
+  color: #142649;
+}
+
+.metric-card span {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #374a70;
+}
+
+.metric-card small {
+  display: block;
+  margin-top: 10px;
+}
+
+.history-card {
+  padding: 28px;
+}
+
+.section-header {
+  display: flex;
+  align-items: end;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.section-header h2 {
+  font-size: clamp(2rem, 3vw, 2.65rem);
+}
+
+.section-link {
+  min-height: auto;
   padding: 0;
-  color: inherit;
-  text-align: left;
+  color: #c25540;
   background: transparent;
 }
 
-.order-select strong {
-  display: block;
-  color: #1a2848;
-  font-size: 1.1rem;
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid rgba(31, 47, 87, 0.08);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
-.order-select p {
-  margin: 6px 0 0;
-  color: #5f6b86;
-  line-height: 1.5;
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.order-select span {
-  font-size: 1rem;
+.orders-table th,
+.orders-table td {
+  padding: 20px;
+  text-align: left;
+}
+
+.orders-table th {
+  font-size: 0.74rem;
   font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5f6b86;
+  background: rgba(232, 237, 252, 0.62);
 }
 
-.order-meta {
-  display: flex;
+.orders-table tbody tr + tr td {
+  border-top: 1px solid rgba(31, 47, 87, 0.08);
+}
+
+.child-link {
+  display: inline-flex;
+  font-weight: 800;
+  color: #122547;
+}
+
+.orders-table td small {
+  display: block;
+  margin-top: 6px;
+  color: #6d7890;
+}
+
+.theme-cell {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  color: #67738c;
 }
 
-@media (max-width: 1180px) {
-  .hero-panel,
-  .workspace-grid,
-  .orders-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .hero-copy h1 {
-    max-width: 13ch;
-  }
+.theme-badge {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #8c5d15;
+  background: rgba(243, 226, 195, 0.88);
 }
 
-@media (max-width: 860px) {
-  .dashboard-scene {
-    padding: 8px 0 24px;
-  }
-
-  .hero-panel,
-  .composer-card,
-  .orders-panel,
-  .summary-card,
-  .payment-card,
-  .invite-card {
-    padding: 22px;
-    border-radius: 26px;
-  }
-
-  .hero-metrics,
-  .theme-grid,
-  .field-grid,
-  .step-list {
-    grid-template-columns: 1fr;
-  }
-
-  .showcase-card {
-    grid-template-columns: 1fr;
-  }
-
-  .showcase-card img {
-    max-height: 220px;
-  }
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.52rem 0.82rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-@media (max-width: 640px) {
-  .hero-copy h1 {
-    font-size: clamp(2.4rem, 13vw, 3.4rem);
-  }
+.is-progress {
+  color: #8b5f18;
+  background: rgba(248, 226, 178, 0.72);
+}
 
-  .hero-actions,
-  .checkout-strip,
-  .order-meta,
-  .payment-links,
-  .order-links {
+.is-pending {
+  color: #b6423e;
+  background: rgba(252, 215, 213, 0.82);
+}
+
+.is-completed {
+  color: #4a63cb;
+  background: rgba(219, 225, 255, 0.88);
+}
+
+.is-canceled {
+  color: #92302d;
+  background: rgba(245, 216, 211, 0.88);
+}
+
+.table-state {
+  padding: 26px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.empty-state {
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .hero-card,
+  .section-header {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .hero-metrics article,
-  .theme-card,
-  .order-card {
-    border-radius: 22px;
+  .hero-actions {
+    min-width: 0;
   }
 
-  .showcase-card,
-  .summary-visual,
-  .payment-box {
-    border-radius: 22px;
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero-card,
+  .history-card {
+    padding: 22px;
+    border-radius: 24px;
+  }
+
+  .orders-table th,
+  .orders-table td {
+    padding: 16px;
   }
 }
 </style>

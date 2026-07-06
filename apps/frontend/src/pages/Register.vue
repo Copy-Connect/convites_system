@@ -72,16 +72,26 @@
 import { ref } from 'vue';
 import { AuthService } from '@/services/AuthService';
 import { useRouter } from 'vue-router';
-const name = ref(''), email = ref(''), password = ref(''), loading = ref(false), error = ref('');
+
+const name = ref('');
+const email = ref('');
+const password = ref('');
+const loading = ref(false);
+const error = ref('');
 const router = useRouter();
 
 async function submit() {
-  loading.value = true; error.value = '';
+  loading.value = true;
+  error.value = '';
+
   try {
     await AuthService.register(name.value, email.value, password.value);
     router.push({ name: 'login' });
-  } catch (e:any) { error.value = e.message || 'Erro ao cadastrar'; }
-  finally { loading.value = false; }
+  } catch (e: any) {
+    error.value = e.message || 'Erro ao cadastrar';
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
@@ -162,7 +172,7 @@ async function submit() {
 .atelier-panel h1,
 .mood h3 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Georgia, 'Times New Roman', serif;
 }
 
 .auth-card h2 {

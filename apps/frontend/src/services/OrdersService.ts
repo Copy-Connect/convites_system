@@ -3,9 +3,16 @@ import { Order } from '@/models/Order';
 
 const api = new ApiClient();
 
+type OrdersQuery = {
+  search?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+};
+
 export const OrdersService = {
-  list() {
-    return api.get<Order[]>('/orders');
+  list(params?: OrdersQuery) {
+    return api.get<Order[]>('/orders', params);
   },
   create(input: Pick<Order, 'name' | 'age' | 'address' | 'themeSlug'>) {
     return api.post<Order>('/orders', input);
