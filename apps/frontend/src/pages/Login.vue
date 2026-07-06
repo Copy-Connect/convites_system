@@ -1,5 +1,6 @@
 <template>
   <section class="login-scene">
+    <div class="color-flow" aria-hidden="true" />
     <div class="backdrop backdrop-blue" />
     <div class="backdrop backdrop-pink" />
     <div class="backdrop backdrop-gold" />
@@ -8,7 +9,7 @@
       <aside class="showcase-panel">
         <div class="showcase-copy">
           <span class="eyebrow">Convites tematicos</span>
-          <h1>Personalize o convite da sua festa com temas que combinam.</h1>
+          <h1>Personalize o convite da sua festa com temas que combinam</h1>
           <p class="lede">
             Convites com fontes e músicas temáticas para criar uma experiência completa para seus convidados.
           </p>
@@ -39,13 +40,6 @@
           </article>
 
           <div class="mini-strip">
-            <article v-for="item in miniThemes" :key="item.title" class="mini-card">
-              <img :src="item.image" :alt="item.alt" />
-              <div>
-                <strong>{{ item.title }}</strong>
-                <span>{{ item.caption }}</span>
-              </div>
-            </article>
           </div>
         </div>
       </aside>
@@ -54,19 +48,20 @@
         <div class="card-top">
           <span class="mini-badge">Acesso do cliente</span>
           <div class="spotlight">
-            <img src="/login/stitch.png" alt="Mascote azul saindo de uma caixa de presente" />
+            <img src="/login/HomemAranha.png" alt="Homem Aranha na parede" />
           </div>
         </div>
 
-        <h2>Entre para acompanhar seus convites</h2>
+        <h2>Entre para montar os seus convites</h2>
         <p class="form-copy">
-          Veja pedidos, aprovacoes e etapas de producao em um painel com a mesma energia dos
-          seus temas favoritos.
+         Crie você mesmo convites digitais com temas que combinam com a sua festa. Personalize fontes, cores e músicas para criar uma experiência completa para seus convidados.
+         
         </p>
 
         <div class="feature-band">
           <span>Arte personalizada</span>
           <span>Pagamento rapido</span>
+          <span>Segurança de dados</span>
           <span>Entrega digital</span>
         </div>
 
@@ -153,11 +148,82 @@ async function submit() {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
+  isolation: isolate;
   padding: 32px;
+  background: linear-gradient(140deg, #fff5ea 0%, #ffe7dc 42%, #dfeeff 100%);
+}
+
+.color-flow {
+  position: absolute;
+  inset: -18%;
+  z-index: 0;
+  pointer-events: none;
   background:
-    radial-gradient(circle at top left, rgba(84, 157, 255, 0.26), transparent 28%),
-    radial-gradient(circle at right center, rgba(255, 78, 122, 0.18), transparent 30%),
-    linear-gradient(140deg, #fff5ea 0%, #ffe7dc 42%, #dfeeff 100%);
+    radial-gradient(circle at 16% 20%, rgba(31, 117, 255, 0.46) 0%, transparent 23%),
+    radial-gradient(circle at 84% 18%, rgba(255, 77, 125, 0.38) 0%, transparent 24%),
+    radial-gradient(circle at 72% 76%, rgba(255, 196, 87, 0.34) 0%, transparent 22%),
+    radial-gradient(circle at 28% 74%, rgba(99, 102, 241, 0.24) 0%, transparent 18%);
+  filter: blur(28px) saturate(112%);
+  transform-origin: center;
+  animation: colorSweep 16s ease-in-out infinite alternate, colorSpin 28s linear infinite;
+}
+
+.color-flow::before,
+.color-flow::after {
+  content: '';
+  position: absolute;
+  inset: 10%;
+  border-radius: 50%;
+  filter: blur(38px);
+  opacity: 0.7;
+}
+
+.color-flow::before {
+  background:
+    radial-gradient(circle at 30% 32%, rgba(255, 255, 255, 0.48) 0%, transparent 26%),
+    radial-gradient(circle at 68% 60%, rgba(255, 212, 138, 0.28) 0%, transparent 24%);
+  animation: shimmerDrift 14s ease-in-out infinite alternate;
+}
+
+.color-flow::after {
+  background:
+    radial-gradient(circle at 72% 28%, rgba(113, 214, 255, 0.34) 0%, transparent 24%),
+    radial-gradient(circle at 38% 74%, rgba(255, 133, 167, 0.26) 0%, transparent 21%);
+  animation: shimmerDriftReverse 18s ease-in-out infinite alternate;
+}
+
+.login-scene::before,
+.login-scene::after {
+  content: '';
+  position: absolute;
+  inset: auto;
+  border-radius: 999px;
+  pointer-events: none;
+  filter: blur(24px);
+  opacity: 0.45;
+  z-index: 0;
+}
+
+.login-scene::before {
+  top: 12%;
+  left: 14%;
+  width: 38vw;
+  height: 38vw;
+  min-width: 280px;
+  min-height: 280px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.56) 0%, rgba(255, 255, 255, 0) 68%);
+  animation: orbFloat 22s ease-in-out infinite;
+}
+
+.login-scene::after {
+  right: 10%;
+  bottom: 8%;
+  width: 30vw;
+  height: 30vw;
+  min-width: 240px;
+  min-height: 240px;
+  background: radial-gradient(circle, rgba(255, 225, 153, 0.36) 0%, rgba(255, 225, 153, 0) 70%);
+  animation: orbFloatReverse 26s ease-in-out infinite;
 }
 
 .backdrop {
@@ -166,6 +232,7 @@ async function submit() {
   filter: blur(18px);
   opacity: 0.85;
   pointer-events: none;
+  animation: blobFloat 16s ease-in-out infinite;
 }
 
 .backdrop-blue {
@@ -174,6 +241,7 @@ async function submit() {
   width: 280px;
   height: 280px;
   background: rgba(31, 117, 255, 0.24);
+  animation-duration: 19s;
 }
 
 .backdrop-pink {
@@ -182,6 +250,8 @@ async function submit() {
   width: 260px;
   height: 260px;
   background: rgba(255, 77, 125, 0.16);
+  animation-duration: 23s;
+  animation-delay: -6s;
 }
 
 .backdrop-gold {
@@ -190,6 +260,8 @@ async function submit() {
   width: 320px;
   height: 320px;
   background: rgba(255, 196, 87, 0.18);
+  animation-duration: 21s;
+  animation-delay: -11s;
 }
 
 .login-shell {
@@ -518,6 +590,106 @@ async function submit() {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes gradientDrift {
+  0% {
+    background-position: 0% 0%, 100% 50%, 50% 50%;
+  }
+  50% {
+    background-position: 18% 12%, 84% 44%, 54% 50%;
+  }
+  100% {
+    background-position: 10% 24%, 100% 62%, 46% 52%;
+  }
+}
+
+@keyframes colorSweep {
+  0% {
+    transform: translate3d(-5%, -3%, 0) scale(1.02);
+  }
+  50% {
+    transform: translate3d(4%, 5%, 0) scale(1.12);
+  }
+  100% {
+    transform: translate3d(7%, -4%, 0) scale(1.05);
+  }
+}
+
+@keyframes colorSpin {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes blobFloat {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(24px, -18px, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-18px, 20px, 0) scale(0.96);
+  }
+}
+
+@keyframes orbFloat {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(36px, -24px, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(-20px, 28px, 0) scale(0.94);
+  }
+}
+
+@keyframes orbFloatReverse {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-32px, 22px, 0) scale(1.1);
+  }
+  100% {
+    transform: translate3d(26px, -18px, 0) scale(0.92);
+  }
+}
+
+@keyframes shimmerDrift {
+  0% {
+    transform: translate3d(-3%, 0, 0) scale(0.98);
+  }
+  100% {
+    transform: translate3d(5%, -4%, 0) scale(1.08);
+  }
+}
+
+@keyframes shimmerDriftReverse {
+  0% {
+    transform: translate3d(3%, 2%, 0) scale(1.02);
+  }
+  100% {
+    transform: translate3d(-4%, 5%, 0) scale(0.94);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .color-flow,
+  .color-flow::before,
+  .color-flow::after,
+  .login-scene::before,
+  .login-scene::after,
+  .backdrop,
+  .showcase-panel,
+  .auth-card {
+    animation: none !important;
   }
 }
 
