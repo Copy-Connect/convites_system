@@ -4,10 +4,7 @@
       <div>
         <span class="eyebrow">Novo pedido</span>
         <h1>Montar convite mobile</h1>
-        <p>
-          Cadastre os dados da festa e os convidados sugeridos para visualizar a prévia do
-          convite com o tema Homem-Aranha.
-        </p>
+        <p>Cadastre os dados da festa para visualizar a previa do convite com o tema Homem-Aranha.</p>
       </div>
     </header>
 
@@ -24,11 +21,33 @@
         </label>
       </div>
 
+      <section class="media-section">
+        <div class="media-header">
+          <div>
+            <h2>Imagem de abertura</h2>
+            <p>Upload opcional para aparecer entre o texto e o botao na abertura do convite.</p>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>Imagem do aniversariante</span>
+          <input type="file" accept="image/png,image/jpeg,image/webp" @change="updateInviteImage" />
+          <small>Dimensao recomendada: 1080 x 1080 px ou superior, com foco centralizado.</small>
+        </label>
+
+        <div v-if="inviteImageUrl" class="image-preview">
+          <img :src="inviteImageUrl" alt="Previa da imagem de abertura" />
+          <button class="remove-image-button" type="button" @click="removeInviteImage">
+            Remover imagem
+          </button>
+        </div>
+      </section>
+
       <section class="address-section">
         <div class="address-header">
           <div>
-            <h2>Endereço da festa</h2>
-            <p>Preencha os campos completos para melhorar a precisão do mapa e do Street View.</p>
+            <h2>Endereco da festa</h2>
+            <p>Preencha os campos completos para melhorar a precisao do mapa e do Street View.</p>
           </div>
         </div>
 
@@ -62,7 +81,7 @@
           </label>
 
           <label class="field">
-            <span>Número</span>
+            <span>Numero</span>
             <input v-model.trim="addressNumber" placeholder="Ex.: 120" required />
           </label>
 
@@ -73,33 +92,28 @@
 
           <label class="field">
             <span>Cidade</span>
-            <input v-model.trim="city" placeholder="Ex.: São Paulo" required />
+            <input v-model.trim="city" placeholder="Ex.: Sao Paulo" required />
           </label>
 
           <label class="field field-span-2">
             <span>Complemento</span>
-            <input v-model.trim="complement" placeholder="Ex.: Salão 2, fundos, casa azul..." />
+            <input v-model.trim="complement" placeholder="Ex.: Salao 2, fundos, casa azul..." />
           </label>
 
           <label class="field field-span-2">
-            <span>Ponto de referência</span>
+            <span>Ponto de referencia</span>
             <input
               v-model.trim="referencePoint"
-              placeholder="Ex.: Em frente à praça principal"
+              placeholder="Ex.: Em frente a praca principal"
             />
           </label>
         </div>
-
-        <label class="field">
-          <span>Prévia do endereço</span>
-          <textarea :model-value="addressPreview" rows="4" readonly />
-        </label>
       </section>
 
       <label class="field">
         <span>Tema inicial</span>
         <input :model-value="themeLabel" readonly />
-        <small>Por enquanto a prévia mobile será exibida apenas com o tema Homem-Aranha.</small>
+        <small>Por enquanto a previa mobile sera exibida apenas com o tema Homem-Aranha.</small>
       </label>
 
       <label class="field">
@@ -107,49 +121,9 @@
         <textarea
           v-model.trim="giftIdeas"
           rows="4"
-          placeholder="Separe cada sugestão em uma nova linha."
+          placeholder="Separe cada sugestao em uma nova linha."
         />
       </label>
-
-      <section class="guest-section">
-        <div class="guest-header">
-          <div>
-            <h2>Possíveis convidados</h2>
-            <p>Esses nomes ficam disponíveis na prévia do convite para agilizar o preenchimento.</p>
-          </div>
-
-          <button class="ghost-button" type="button" @click="addGuestRow">+ Adicionar</button>
-        </div>
-
-        <div class="guest-list">
-          <div v-for="(guest, index) in possibleGuests" :key="index" class="guest-row">
-            <label class="field">
-              <span>Nome</span>
-              <input v-model.trim="guest.name" placeholder="Ex.: Maria" />
-            </label>
-
-            <label class="field guest-age">
-              <span>Idade</span>
-              <input
-                :model-value="guest.age"
-                type="number"
-                min="1"
-                placeholder="Ex.: 7"
-                @input="updateGuestAge(index, $event)"
-              />
-            </label>
-
-            <button
-              class="remove-button"
-              type="button"
-              :disabled="possibleGuests.length === 1"
-              @click="removeGuestRow(index)"
-            >
-              Remover
-            </button>
-          </div>
-        </div>
-      </section>
 
       <button class="submit" :disabled="loading">
         {{ loading ? 'Criando pedido...' : 'Salvar e seguir para o pagamento' }}
@@ -166,11 +140,6 @@ import { OrdersService } from '@/services/OrdersService';
 import { useRouter } from 'vue-router';
 import { formatOrderAddress, formatZipCode } from '@/utils/orderInvite';
 
-type EditableGuest = {
-  name: string;
-  age: string;
-};
-
 const themeSlug = 'homem-aranha';
 const name = ref('');
 const age = ref<number | undefined>();
@@ -182,25 +151,13 @@ const city = ref('');
 const stateCode = ref('');
 const complement = ref('');
 const referencePoint = ref('');
+const inviteImageUrl = ref('');
 const giftIdeas = ref('');
-const possibleGuests = ref<EditableGuest[]>([{ name: '', age: '' }]);
 const loading = ref(false);
 const error = ref('');
 const router = useRouter();
 
 const themeLabel = computed(() => 'Homem-Aranha');
-const addressPreview = computed(() =>
-  formatOrderAddress({
-    zipCode: zipCode.value,
-    street: street.value,
-    addressNumber: addressNumber.value,
-    neighborhood: neighborhood.value,
-    city: city.value,
-    stateCode: stateCode.value,
-    complement: complement.value,
-    referencePoint: referencePoint.value,
-  }),
-);
 
 function updateZipCode(event: Event) {
   const target = event.target as HTMLInputElement;
@@ -212,56 +169,57 @@ function updateStateCode(event: Event) {
   stateCode.value = target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
 }
 
-function addGuestRow() {
-  possibleGuests.value.push({ name: '', age: '' });
-}
+async function updateInviteImage(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
 
-function removeGuestRow(index: number) {
-  if (possibleGuests.value.length === 1) {
-    possibleGuests.value[0] = { name: '', age: '' };
+  if (!file) {
+    inviteImageUrl.value = '';
     return;
   }
 
-  possibleGuests.value.splice(index, 1);
-}
-
-function updateGuestAge(index: number, event: Event) {
-  const target = event.target as HTMLInputElement;
-  possibleGuests.value[index].age = target.value;
-}
-
-function normalizeGuests() {
-  const normalized = possibleGuests.value
-    .map((guest) => ({
-      name: guest.name.trim(),
-      age: guest.age.trim(),
-    }))
-    .filter((guest) => guest.name || guest.age);
-
-  const hasIncompleteGuest = normalized.some((guest) => {
-    const ageValue = Number(guest.age);
-    return !guest.name || !Number.isInteger(ageValue) || ageValue <= 0;
-  });
-
-  if (hasIncompleteGuest) {
-    throw new Error('Preencha nome e idade dos convidados sugeridos ou remova a linha incompleta.');
+  const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    target.value = '';
+    throw new Error('Use apenas imagens PNG, JPG ou WEBP.');
   }
 
-  return normalized.map((guest) => ({
-    name: guest.name,
-    age: Number(guest.age),
-  }));
+  inviteImageUrl.value = await readFileAsDataUrl(file);
+}
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Nao foi possivel carregar a imagem.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeInviteImage() {
+  inviteImageUrl.value = '';
 }
 
 async function submit() {
   loading.value = true;
   error.value = '';
 
+  const formattedAddress = formatOrderAddress({
+    zipCode: zipCode.value,
+    street: street.value,
+    addressNumber: addressNumber.value,
+    neighborhood: neighborhood.value,
+    city: city.value,
+    stateCode: stateCode.value,
+    complement: complement.value,
+    referencePoint: referencePoint.value,
+  });
+
   try {
     const order = await OrdersService.create({
       name: name.value,
       age: age.value!,
-      address: addressPreview.value,
+      address: formattedAddress,
       zipCode: zipCode.value,
       street: street.value,
       addressNumber: addressNumber.value,
@@ -270,9 +228,10 @@ async function submit() {
       stateCode: stateCode.value,
       complement: complement.value,
       referencePoint: referencePoint.value,
+      inviteImageUrl: inviteImageUrl.value,
       themeSlug,
       giftIdeas: giftIdeas.value,
-      possibleGuests: normalizeGuests(),
+      possibleGuests: [],
     });
 
     await router.push({ name: 'orders-checkout', params: { id: order.id } });
@@ -329,8 +288,8 @@ async function submit() {
 
 .intro-card p,
 .field small,
-.guest-header p,
-.address-header p {
+.address-header p,
+.media-header p {
   margin: 0;
   line-height: 1.7;
   color: #62708b;
@@ -342,8 +301,7 @@ async function submit() {
   padding: 30px;
 }
 
-.field-grid,
-.guest-row {
+.field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -365,16 +323,16 @@ async function submit() {
 }
 
 .field span,
-.guest-header h2,
-.address-header h2 {
+.address-header h2,
+.media-header h2 {
   margin: 0;
   font-size: 0.92rem;
   font-weight: 800;
   color: #30405e;
 }
 
-.address-section,
-.guest-section {
+.media-section,
+.address-section {
   display: grid;
   gap: 16px;
   padding: 20px;
@@ -382,51 +340,38 @@ async function submit() {
   background: rgba(241, 244, 251, 0.78);
 }
 
-.guest-header,
-.address-header {
+.address-header,
+.media-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
 }
 
-.guest-list {
+.image-preview {
   display: grid;
   gap: 12px;
 }
 
-.guest-row {
-  align-items: end;
+.image-preview img {
+  width: min(220px, 100%);
+  border-radius: 22px;
+  object-fit: cover;
+  box-shadow: 0 18px 30px rgba(31, 45, 82, 0.14);
 }
 
-.guest-age {
-  max-width: 180px;
-}
-
-.ghost-button,
-.remove-button,
+.remove-image-button,
 .submit {
   min-height: 52px;
   border-radius: 18px;
   font-weight: 800;
 }
 
-.ghost-button {
+.remove-image-button {
   padding: 0 1rem;
   color: #20345d;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: inset 0 0 0 1px rgba(31, 47, 87, 0.08);
-}
-
-.remove-button {
-  padding: 0 1rem;
-  color: #8e3e3a;
-  background: rgba(255, 238, 236, 0.9);
-}
-
-.remove-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
 }
 
 .submit {
@@ -456,17 +401,15 @@ async function submit() {
 
 @media (max-width: 860px) {
   .field-grid,
-  .guest-row,
   .address-grid {
     grid-template-columns: 1fr;
   }
 
-  .guest-header,
-  .address-header {
+  .address-header,
+  .media-header {
     flex-direction: column;
   }
 
-  .guest-age,
   .field-span-2 {
     max-width: none;
     grid-column: auto;
@@ -480,8 +423,8 @@ async function submit() {
     border-radius: 24px;
   }
 
-  .address-section,
-  .guest-section {
+  .media-section,
+  .address-section {
     padding: 18px;
   }
 }

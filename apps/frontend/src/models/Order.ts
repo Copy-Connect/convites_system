@@ -16,6 +16,7 @@ export class Order {
   stateCode = '';
   complement = '';
   referencePoint = '';
+  inviteImageUrl = '';
   giftIdeas = '';
   possibleGuests: OrderGuest[] = [];
   themeSlug = '';
