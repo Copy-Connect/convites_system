@@ -5,21 +5,23 @@
     <audio ref="musicRef" :src="spiderMusic" preload="auto" loop />
     <audio ref="clickRef" :src="spiderClickSound" preload="auto" />
 
-    <div v-if="loading" class="state-card">Carregando prévia do convite...</div>
+    <div v-if="loading" class="state-card">Carregando previa do convite...</div>
     <div v-else-if="error" class="state-card is-error">{{ error }}</div>
 
     <template v-else-if="order">
       <div v-if="!inviteOpen" class="entry-screen">
         <div class="entry-copy">
-          <span class="entry-eyebrow">Convite mobile</span>
+          <span class="entry-eyebrow">Convite especial</span>
           <h1>{{ order.name }}</h1>
-          <p>Toque no botão para abrir a prévia do convite com o tema Homem-Aranha.</p>
+          <p>Ola, voce foi convidado para a minha festa, toque no botao abaixo para confirmar sua presenca.</p>
+        </div>
+
+        <div v-if="order.inviteImageUrl" class="entry-photo-wrap">
+          <img class="entry-photo" :src="order.inviteImageUrl" alt="Imagem do aniversariante" />
         </div>
 
         <button class="entry-button" type="button" @click="openInvite">
-          <span class="entry-button-art" aria-hidden="true">
-            <span class="entry-button-core">Abrir convite</span>
-          </span>
+          <img class="entry-button-art" :src="spiderButton" alt="Abrir convite" />
         </button>
       </div>
 
@@ -29,30 +31,18 @@
         </RouterLink>
 
         <header class="card hero-card">
-          <span class="eyebrow">Aniversário em missão</span>
+          <span class="eyebrow">Aniversario em missao</span>
           <h1>{{ order.name }}</h1>
-          <p>{{ order.age }} anos de aventura aracnídea.</p>
+          <p>{{ order.age }} anos de aventura aracnidea.</p>
         </header>
 
         <section class="card">
           <div class="section-head">
             <span class="section-index">01</span>
             <div>
-              <h2>Confirmação de convidados</h2>
-              <p>Preencha nome e idade dos convidados que virão à minha festa.</p>
+              <h2>Confirmacao de convidados</h2>
+              <p>Preencha nome e idade dos convidados que virao a minha festa.</p>
             </div>
-          </div>
-
-          <div v-if="suggestedGuests.length" class="guest-shortcuts">
-            <button
-              v-for="guest in suggestedGuests"
-              :key="`${guest.name}-${guest.age}`"
-              type="button"
-              class="shortcut-chip"
-              @click="applySuggestedGuest(guest.name, guest.age)"
-            >
-              {{ formatGuestLabel(guest) }}
-            </button>
           </div>
 
           <form class="incremental-form" @submit.prevent="advanceForm">
@@ -78,9 +68,28 @@
                 :key="confirmedGuest.id"
                 class="confirmed-card"
               >
-                <strong>{{ confirmedGuest.name }}</strong>
+                <div class="confirmed-card-head">
+                  <strong>{{ confirmedGuest.name }}</strong>
+                  <button
+                    class="delete-guest-button"
+                    type="button"
+                    aria-label="Apagar convidado cadastrado"
+                    @click="removeConfirmedGuest(confirmedGuest.id)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M9 3h6m-9 4h12m-1 0-.7 11.1a2 2 0 0 1-2 1.9h-4.6a2 2 0 0 1-2-1.9L6 7m4 4v5m4-5v5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                      />
+                    </svg>
+                  </button>
+                </div>
                 <p>
-                  Missão confirmada para você. Agora se prepare para a festa de
+                  Missao confirmada para voce. Agora se prepare para a festa de
                   {{ order.name }}.
                 </p>
               </article>
@@ -105,6 +114,12 @@
                 Preencher outro convidado
               </button>
             </div>
+
+            <div v-if="confirmedGuests.length" class="confirm-actions">
+              <button class="confirm-guests-button" type="button" @click="confirmGuests">
+                Confirmar convidados
+              </button>
+            </div>
           </form>
         </section>
 
@@ -112,7 +127,7 @@
           <div class="section-head">
             <span class="section-index">02</span>
             <div>
-              <h2>Onde será a festa</h2>
+              <h2>Onde sera a festa</h2>
               <p class="address-copy">{{ formattedAddress }}</p>
             </div>
           </div>
@@ -136,7 +151,7 @@
             <span class="section-index">03</span>
             <div>
               <h2>Ideias de presentes</h2>
-              <p>Sugestões cadastradas no pedido para ajudar os convidados.</p>
+              <p>Sugestoes cadastradas no pedido para ajudar os convidados.</p>
             </div>
           </div>
 
@@ -158,11 +173,11 @@ import type { Order } from '@/models/Order';
 import { OrdersService } from '@/services/OrdersService';
 import {
   buildStreetViewUrl,
-  formatGuestLabel,
   formatOrderAddress,
   parseGiftIdeas,
 } from '@/utils/orderInvite';
 import spiderBackground from '@/assets/images/Mobile/Super Heróis/Homem-Aranha/bg1.png';
+import spiderButton from '@/assets/images/Mobile/Super Heróis/Homem-Aranha/bt1.png';
 import spiderMusic from '@/assets/music/Super Heróis/SpiderMan/Ramones - Spider-Man - MACVSOG84 (youtube).mp3';
 import spiderClickSound from '@/assets/sound/HomemAranha/Firefly_audio_Spider-Man_web-shooting_effect_variation3.wav';
 
@@ -189,7 +204,6 @@ const pageStyle = computed(() => ({
 }));
 
 const giftIdeas = computed(() => parseGiftIdeas(order.value?.giftIdeas));
-const suggestedGuests = computed(() => order.value?.possibleGuests ?? []);
 const streetViewUrl = computed(() => buildStreetViewUrl(order.value));
 const formattedAddress = computed(() => formatOrderAddress(order.value));
 const canAdvance = computed(() => {
@@ -214,16 +228,19 @@ function confirmGuest(name: string, age: number) {
   currentStep.value = 'done';
 }
 
-function applySuggestedGuest(name: string, age: number) {
-  guestName.value = name;
-  guestAge.value = String(age);
-  confirmGuest(name, age);
-}
-
 function resetForm() {
   guestName.value = '';
   guestAge.value = '';
   currentStep.value = 'name';
+}
+
+function removeConfirmedGuest(guestId: string) {
+  confirmedGuests.value = confirmedGuests.value.filter((guest) => guest.id !== guestId);
+}
+
+function confirmGuests() {
+  confirmedGuests.value = [];
+  resetForm();
 }
 
 function advanceForm() {
@@ -291,7 +308,7 @@ onMounted(async () => {
     error.value =
       requestError?.response?.data?.message ||
       requestError?.message ||
-      'Não foi possível carregar a prévia do convite.';
+      'Nao foi possivel carregar a previa do convite.';
   } finally {
     loading.value = false;
   }
@@ -406,9 +423,22 @@ onUnmounted(() => {
   line-height: 1.7;
 }
 
+.entry-photo-wrap {
+  width: min(220px, 58vw);
+}
+
+.entry-photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 28px;
+  object-fit: cover;
+  box-shadow:
+    0 22px 44px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
 .entry-button {
   display: grid;
-  gap: 12px;
   justify-items: center;
   width: min(300px, 100%);
   padding: 0;
@@ -417,47 +447,11 @@ onUnmounted(() => {
 }
 
 .entry-button-art {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  aspect-ratio: 1.95 / 1;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 32px;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), transparent 32%),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.08) 0,
-      rgba(255, 255, 255, 0.08) 1px,
-      transparent 1px,
-      transparent 22px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      rgba(255, 255, 255, 0.08) 0,
-      rgba(255, 255, 255, 0.08) 1px,
-      transparent 1px,
-      transparent 18px
-    ),
-    linear-gradient(135deg, rgba(86, 0, 6, 0.96), rgba(230, 28, 42, 0.92));
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.36),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
-}
+  width: 50%;
 
-.entry-button-core {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 54px;
-  padding: 0 1.2rem;
-  border-radius: 999px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #ffffff;
-  background: rgba(7, 8, 14, 0.58);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.36));
 }
 
 .invite-shell {
@@ -525,33 +519,33 @@ onUnmounted(() => {
   background: linear-gradient(135deg, rgba(208, 28, 42, 0.96), rgba(79, 7, 13, 0.96));
 }
 
-.guest-shortcuts,
 .gift-grid,
 .address-actions,
 .form-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
   margin-top: 18px;
 }
 
-.shortcut-chip,
 .gift-chip,
 .ghost-button,
 .primary-button,
-.link-button {
+.link-button,
+.confirm-guests-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 48px;
+  width: 100%;
   padding: 0 1rem;
   border-radius: 16px;
   font-weight: 800;
 }
 
-.shortcut-chip,
 .gift-chip,
-.ghost-button {
+.ghost-button,
+.confirm-guests-button {
   color: var(--text);
   background: rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
@@ -603,11 +597,36 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.confirmed-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
 .confirmed-card strong {
   display: block;
-  margin-bottom: 8px;
   font-size: 1.12rem;
   color: var(--text);
+}
+
+.delete-guest-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 12px;
+  color: #ff6b6b;
+  background: rgba(131, 14, 24, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(255, 107, 107, 0.18);
+}
+
+.delete-guest-button svg {
+  width: 18px;
+  height: 18px;
 }
 
 .confirmed-card p,
@@ -629,8 +648,12 @@ onUnmounted(() => {
   cursor: not-allowed;
 }
 
-.link-button {
-  width: fit-content;
+.confirm-actions {
+  margin-top: 12px;
+}
+
+.confirm-guests-button {
+  min-height: 52px;
 }
 
 @media (max-width: 420px) {
@@ -645,13 +668,7 @@ onUnmounted(() => {
 
   .address-actions,
   .form-actions {
-    flex-direction: column;
-  }
-
-  .link-button,
-  .primary-button,
-  .ghost-button {
-    width: 100%;
+    gap: 10px;
   }
 }
 </style>

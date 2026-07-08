@@ -28,6 +28,7 @@ export const OrdersService = {
       | 'stateCode'
       | 'complement'
       | 'referencePoint'
+      | 'inviteImageUrl'
       | 'themeSlug'
       | 'giftIdeas'
       | 'possibleGuests'
