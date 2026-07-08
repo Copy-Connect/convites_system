@@ -28,7 +28,7 @@ export function resolveOrderUiState(order: Order): OrderUiState {
 export function getOrderStatusLabel(order: Order) {
   switch (resolveOrderUiState(order)) {
     case 'completed':
-      return 'Concluído';
+      return 'Concluido';
     case 'in_progress':
       return 'Em andamento';
     case 'canceled':
@@ -52,7 +52,12 @@ export function getOrderStatusClass(order: Order) {
 }
 
 export function getOrderThemeLabel(order: Order) {
-  return order.themeName || order.themeSlug || 'Tema não informado';
+  const themeSlug = (order.themeSlug || '').trim().toLowerCase();
+  const themeLabels: Record<string, string> = {
+    'homem-aranha': 'Homem-Aranha',
+  };
+
+  return order.themeName || themeLabels[themeSlug] || order.themeSlug || 'Tema nao informado';
 }
 
 export function getOrderCode(order: Order) {

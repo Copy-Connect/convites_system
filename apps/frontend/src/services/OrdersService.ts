@@ -14,7 +14,9 @@ export const OrdersService = {
   list(params?: OrdersQuery) {
     return api.get<Order[]>('/orders', params);
   },
-  create(input: Pick<Order, 'name' | 'age' | 'address' | 'themeSlug'>) {
+  create(
+    input: Pick<Order, 'name' | 'age' | 'address' | 'themeSlug' | 'giftIdeas' | 'possibleGuests'>,
+  ) {
     return api.post<Order>('/orders', input);
   },
   get(id: string) {
