@@ -5,7 +5,7 @@
     <audio ref="musicRef" :src="spiderMusic" preload="auto" loop />
     <audio ref="clickRef" :src="spiderClickSound" preload="auto" />
 
-    <div v-if="loading" class="state-card">Carregando previa do convite...</div>
+    <div v-if="loading" class="state-card">Carregando prévia do convite...</div>
     <div v-else-if="error" class="state-card is-error">{{ error }}</div>
 
     <template v-else-if="order">
@@ -13,12 +13,13 @@
         <div class="entry-copy">
           <span class="entry-eyebrow">Convite mobile</span>
           <h1>{{ order.name }}</h1>
-          <p>Toque no botao para abrir a previa do convite com o tema Homem-Aranha.</p>
+          <p>Toque no botão para abrir a prévia do convite com o tema Homem-Aranha.</p>
         </div>
 
         <button class="entry-button" type="button" @click="openInvite">
-          <span class="entry-button-art" aria-hidden="true" />
-          <span class="entry-button-copy">Abrir convite</span>
+          <span class="entry-button-art" aria-hidden="true">
+            <span class="entry-button-core">Abrir convite</span>
+          </span>
         </button>
       </div>
 
@@ -28,17 +29,17 @@
         </RouterLink>
 
         <header class="card hero-card">
-          <span class="eyebrow">Aniversario em missao</span>
+          <span class="eyebrow">Aniversário em missão</span>
           <h1>{{ order.name }}</h1>
-          <p>{{ order.age }} anos de aventura aracnidea.</p>
+          <p>{{ order.age }} anos de aventura aracnídea.</p>
         </header>
 
         <section class="card">
           <div class="section-head">
             <span class="section-index">01</span>
             <div>
-              <h2>Confirmacao incremental</h2>
-              <p>Preencha nome e idade do convidado em duas etapas.</p>
+              <h2>Confirmação de convidados</h2>
+              <p>Preencha nome e idade dos convidados que virão à minha festa.</p>
             </div>
           </div>
 
@@ -71,12 +72,18 @@
               />
             </label>
 
-            <div v-else class="success-box">
-              <strong>{{ guestName }}</strong>
-              <p>
-                Missao confirmada para {{ guestAge }} anos. Agora e so se preparar para a festa de
-                {{ order.name }}.
-              </p>
+            <div v-if="confirmedGuests.length" class="confirmed-list">
+              <article
+                v-for="confirmedGuest in confirmedGuests"
+                :key="confirmedGuest.id"
+                class="confirmed-card"
+              >
+                <strong>{{ confirmedGuest.name }}</strong>
+                <p>
+                  Missão confirmada para você. Agora se prepare para a festa de
+                  {{ order.name }}.
+                </p>
+              </article>
             </div>
 
             <div class="form-actions">
@@ -95,7 +102,7 @@
                 type="button"
                 @click="resetForm"
               >
-                Preencher novamente
+                Preencher outro convidado
               </button>
             </div>
           </form>
@@ -105,8 +112,8 @@
           <div class="section-head">
             <span class="section-index">02</span>
             <div>
-              <h2>Onde sera a festa</h2>
-              <p>{{ order.address }}</p>
+              <h2>Onde será a festa</h2>
+              <p class="address-copy">{{ formattedAddress }}</p>
             </div>
           </div>
 
@@ -129,7 +136,7 @@
             <span class="section-index">03</span>
             <div>
               <h2>Ideias de presentes</h2>
-              <p>Sugestoes cadastradas no pedido para ajudar os convidados.</p>
+              <p>Sugestões cadastradas no pedido para ajudar os convidados.</p>
             </div>
           </div>
 
@@ -149,10 +156,21 @@ import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import type { Order } from '@/models/Order';
 import { OrdersService } from '@/services/OrdersService';
-import { buildStreetViewUrl, formatGuestLabel, parseGiftIdeas } from '@/utils/orderInvite';
+import {
+  buildStreetViewUrl,
+  formatGuestLabel,
+  formatOrderAddress,
+  parseGiftIdeas,
+} from '@/utils/orderInvite';
 import spiderBackground from '@/assets/images/Mobile/Super Heróis/Homem-Aranha/bg1.png';
 import spiderMusic from '@/assets/music/Super Heróis/SpiderMan/Ramones - Spider-Man - MACVSOG84 (youtube).mp3';
 import spiderClickSound from '@/assets/sound/HomemAranha/Firefly_audio_Spider-Man_web-shooting_effect_variation3.wav';
+
+type ConfirmedGuest = {
+  id: string;
+  name: string;
+  age: number;
+};
 
 const route = useRoute();
 const order = ref<Order | null>(null);
@@ -162,6 +180,7 @@ const inviteOpen = ref(false);
 const currentStep = ref<'name' | 'age' | 'done'>('name');
 const guestName = ref('');
 const guestAge = ref('');
+const confirmedGuests = ref<ConfirmedGuest[]>([]);
 const musicRef = ref<HTMLAudioElement | null>(null);
 const clickRef = ref<HTMLAudioElement | null>(null);
 
@@ -171,7 +190,8 @@ const pageStyle = computed(() => ({
 
 const giftIdeas = computed(() => parseGiftIdeas(order.value?.giftIdeas));
 const suggestedGuests = computed(() => order.value?.possibleGuests ?? []);
-const streetViewUrl = computed(() => buildStreetViewUrl(order.value?.address));
+const streetViewUrl = computed(() => buildStreetViewUrl(order.value));
+const formattedAddress = computed(() => formatOrderAddress(order.value));
 const canAdvance = computed(() => {
   if (currentStep.value === 'name') {
     return guestName.value.trim().length > 1;
@@ -185,10 +205,19 @@ const canAdvance = computed(() => {
   return true;
 });
 
+function confirmGuest(name: string, age: number) {
+  confirmedGuests.value.unshift({
+    id: `${name}-${age}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    name,
+    age,
+  });
+  currentStep.value = 'done';
+}
+
 function applySuggestedGuest(name: string, age: number) {
   guestName.value = name;
   guestAge.value = String(age);
-  currentStep.value = 'done';
+  confirmGuest(name, age);
 }
 
 function resetForm() {
@@ -204,7 +233,7 @@ function advanceForm() {
   }
 
   if (currentStep.value === 'age' && canAdvance.value) {
-    currentStep.value = 'done';
+    confirmGuest(guestName.value.trim(), Number(guestAge.value));
   }
 }
 
@@ -262,7 +291,7 @@ onMounted(async () => {
     error.value =
       requestError?.response?.data?.message ||
       requestError?.message ||
-      'Nao foi possivel carregar a previa do convite.';
+      'Não foi possível carregar a prévia do convite.';
   } finally {
     loading.value = false;
   }
@@ -381,29 +410,54 @@ onUnmounted(() => {
   display: grid;
   gap: 12px;
   justify-items: center;
-  width: min(280px, 100%);
+  width: min(300px, 100%);
   padding: 0;
   color: var(--text);
   background: transparent;
 }
 
 .entry-button-art {
+  display: grid;
+  place-items: center;
   width: 100%;
-  aspect-ratio: 1.9 / 1;
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  aspect-ratio: 1.95 / 1;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 32px;
   background:
-    linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.56)),
-    var(--invite-bg) center/cover no-repeat;
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), transparent 32%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.08) 0,
+      rgba(255, 255, 255, 0.08) 1px,
+      transparent 1px,
+      transparent 22px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.08) 0,
+      rgba(255, 255, 255, 0.08) 1px,
+      transparent 1px,
+      transparent 18px
+    ),
+    linear-gradient(135deg, rgba(86, 0, 6, 0.96), rgba(230, 28, 42, 0.92));
   box-shadow:
     0 20px 40px rgba(0, 0, 0, 0.36),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
-.entry-button-copy {
-  font-weight: 800;
-  letter-spacing: 0.1em;
+.entry-button-core {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  padding: 0 1.2rem;
+  border-radius: 999px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: #ffffff;
+  background: rgba(7, 8, 14, 0.58);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .invite-shell {
@@ -537,23 +591,31 @@ onUnmounted(() => {
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
 }
 
-.success-box {
+.confirmed-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.confirmed-card {
   padding: 18px;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.06);
 }
 
-.success-box strong {
+.confirmed-card strong {
   display: block;
   margin-bottom: 8px;
   font-size: 1.12rem;
   color: var(--text);
 }
 
-.success-box p {
+.confirmed-card p,
+.address-copy {
   margin: 0;
-  color: var(--muted);
   line-height: 1.6;
+  white-space: pre-line;
+  color: var(--muted);
 }
 
 .primary-button {

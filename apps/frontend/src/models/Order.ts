@@ -8,6 +8,14 @@ export class Order {
   name = '';
   age?: number;
   address = '';
+  zipCode = '';
+  street = '';
+  addressNumber = '';
+  neighborhood = '';
+  city = '';
+  stateCode = '';
+  complement = '';
+  referencePoint = '';
   giftIdeas = '';
   possibleGuests: OrderGuest[] = [];
   themeSlug = '';

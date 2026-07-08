@@ -14,10 +14,10 @@
 
     <section class="content-grid">
       <article class="info-card">
-        <h2>Informacoes principais</h2>
+        <h2>Informações principais</h2>
         <dl>
           <div>
-            <dt>Codigo</dt>
+            <dt>Código</dt>
             <dd>{{ getOrderCode(order) }}</dd>
           </div>
           <div>
@@ -33,8 +33,8 @@
             <dd>{{ getOrderThemeLabel(order) }}</dd>
           </div>
           <div class="span-all">
-            <dt>Endereco</dt>
-            <dd>{{ order.address }}</dd>
+            <dt>Endereço</dt>
+            <dd class="multiline">{{ formattedAddress }}</dd>
           </div>
           <div class="span-all">
             <dt>Ideias de presentes</dt>
@@ -52,7 +52,7 @@
       </article>
 
       <aside class="action-card">
-        <h2>Proximos passos</h2>
+        <h2>Próximos passos</h2>
         <p>Abra a prévia mobile do convite ou siga para o checkout para liberar a entrega final.</p>
 
         <RouterLink
@@ -85,14 +85,15 @@ import {
   getOrderThemeLabel,
   getOrderTitle,
 } from '@/utils/orderPresentation';
-import { formatGuestLabel, parseGiftIdeas } from '@/utils/orderInvite';
+import { formatGuestLabel, formatOrderAddress, parseGiftIdeas } from '@/utils/orderInvite';
 
 const route = useRoute();
 const order = ref<Order | null>(null);
 
+const formattedAddress = computed(() => formatOrderAddress(order.value));
 const giftIdeasLabel = computed(() => {
   const items = parseGiftIdeas(order.value?.giftIdeas);
-  return items.length ? items.join(' • ') : 'Nenhuma sugestao cadastrada.';
+  return items.length ? items.join(' • ') : 'Nenhuma sugestão cadastrada.';
 });
 
 const possibleGuestsLabel = computed(() => {
@@ -192,6 +193,10 @@ onMounted(async () => {
   margin: 8px 0 0;
   line-height: 1.65;
   color: #1c2e51;
+}
+
+.multiline {
+  white-space: pre-line;
 }
 
 .status-pill {

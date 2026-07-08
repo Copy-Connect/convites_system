@@ -15,7 +15,23 @@ export const OrdersService = {
     return api.get<Order[]>('/orders', params);
   },
   create(
-    input: Pick<Order, 'name' | 'age' | 'address' | 'themeSlug' | 'giftIdeas' | 'possibleGuests'>,
+    input: Pick<
+      Order,
+      | 'name'
+      | 'age'
+      | 'address'
+      | 'zipCode'
+      | 'street'
+      | 'addressNumber'
+      | 'neighborhood'
+      | 'city'
+      | 'stateCode'
+      | 'complement'
+      | 'referencePoint'
+      | 'themeSlug'
+      | 'giftIdeas'
+      | 'possibleGuests'
+    >,
   ) {
     return api.post<Order>('/orders', input);
   },
