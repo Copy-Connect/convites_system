@@ -24,10 +24,77 @@
         </label>
       </div>
 
-      <label class="field">
-        <span>Endereco</span>
-        <input v-model.trim="address" required />
-      </label>
+      <section class="address-section">
+        <div class="address-header">
+          <div>
+            <h2>Endereço da festa</h2>
+            <p>Preencha os campos completos para melhorar a precisão do mapa e do Street View.</p>
+          </div>
+        </div>
+
+        <div class="address-grid">
+          <label class="field">
+            <span>CEP</span>
+            <input
+              :model-value="zipCode"
+              inputmode="numeric"
+              maxlength="9"
+              placeholder="00000-000"
+              required
+              @input="updateZipCode"
+            />
+          </label>
+
+          <label class="field">
+            <span>UF</span>
+            <input
+              :model-value="stateCode"
+              maxlength="2"
+              placeholder="SP"
+              required
+              @input="updateStateCode"
+            />
+          </label>
+
+          <label class="field field-span-2">
+            <span>Rua</span>
+            <input v-model.trim="street" placeholder="Ex.: Rua das Flores" required />
+          </label>
+
+          <label class="field">
+            <span>Número</span>
+            <input v-model.trim="addressNumber" placeholder="Ex.: 120" required />
+          </label>
+
+          <label class="field">
+            <span>Bairro</span>
+            <input v-model.trim="neighborhood" placeholder="Ex.: Centro" required />
+          </label>
+
+          <label class="field">
+            <span>Cidade</span>
+            <input v-model.trim="city" placeholder="Ex.: São Paulo" required />
+          </label>
+
+          <label class="field field-span-2">
+            <span>Complemento</span>
+            <input v-model.trim="complement" placeholder="Ex.: Salão 2, fundos, casa azul..." />
+          </label>
+
+          <label class="field field-span-2">
+            <span>Ponto de referência</span>
+            <input
+              v-model.trim="referencePoint"
+              placeholder="Ex.: Em frente à praça principal"
+            />
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Prévia do endereço</span>
+          <textarea :model-value="addressPreview" rows="4" readonly />
+        </label>
+      </section>
 
       <label class="field">
         <span>Tema inicial</span>
@@ -47,8 +114,8 @@
       <section class="guest-section">
         <div class="guest-header">
           <div>
-            <h2>Possiveis convidados</h2>
-            <p>Esses nomes ficam disponiveis na prévia do convite para agilizar o preenchimento.</p>
+            <h2>Possíveis convidados</h2>
+            <p>Esses nomes ficam disponíveis na prévia do convite para agilizar o preenchimento.</p>
           </div>
 
           <button class="ghost-button" type="button" @click="addGuestRow">+ Adicionar</button>
@@ -97,6 +164,7 @@
 import { computed, ref } from 'vue';
 import { OrdersService } from '@/services/OrdersService';
 import { useRouter } from 'vue-router';
+import { formatOrderAddress, formatZipCode } from '@/utils/orderInvite';
 
 type EditableGuest = {
   name: string;
@@ -106,14 +174,43 @@ type EditableGuest = {
 const themeSlug = 'homem-aranha';
 const name = ref('');
 const age = ref<number | undefined>();
-const address = ref('');
+const zipCode = ref('');
+const street = ref('');
+const addressNumber = ref('');
+const neighborhood = ref('');
+const city = ref('');
+const stateCode = ref('');
+const complement = ref('');
+const referencePoint = ref('');
 const giftIdeas = ref('');
 const possibleGuests = ref<EditableGuest[]>([{ name: '', age: '' }]);
 const loading = ref(false);
 const error = ref('');
 const router = useRouter();
 
-const themeLabel = computed(() => 'homem-aranha');
+const themeLabel = computed(() => 'Homem-Aranha');
+const addressPreview = computed(() =>
+  formatOrderAddress({
+    zipCode: zipCode.value,
+    street: street.value,
+    addressNumber: addressNumber.value,
+    neighborhood: neighborhood.value,
+    city: city.value,
+    stateCode: stateCode.value,
+    complement: complement.value,
+    referencePoint: referencePoint.value,
+  }),
+);
+
+function updateZipCode(event: Event) {
+  const target = event.target as HTMLInputElement;
+  zipCode.value = formatZipCode(target.value);
+}
+
+function updateStateCode(event: Event) {
+  const target = event.target as HTMLInputElement;
+  stateCode.value = target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+}
 
 function addGuestRow() {
   possibleGuests.value.push({ name: '', age: '' });
@@ -164,7 +261,15 @@ async function submit() {
     const order = await OrdersService.create({
       name: name.value,
       age: age.value!,
-      address: address.value,
+      address: addressPreview.value,
+      zipCode: zipCode.value,
+      street: street.value,
+      addressNumber: addressNumber.value,
+      neighborhood: neighborhood.value,
+      city: city.value,
+      stateCode: stateCode.value,
+      complement: complement.value,
+      referencePoint: referencePoint.value,
       themeSlug,
       giftIdeas: giftIdeas.value,
       possibleGuests: normalizeGuests(),
@@ -224,7 +329,8 @@ async function submit() {
 
 .intro-card p,
 .field small,
-.guest-header p {
+.guest-header p,
+.address-header p {
   margin: 0;
   line-height: 1.7;
   color: #62708b;
@@ -243,19 +349,31 @@ async function submit() {
   gap: 16px;
 }
 
+.address-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .field {
   display: grid;
   gap: 8px;
 }
 
+.field-span-2 {
+  grid-column: span 2;
+}
+
 .field span,
-.guest-header h2 {
+.guest-header h2,
+.address-header h2 {
   margin: 0;
   font-size: 0.92rem;
   font-weight: 800;
   color: #30405e;
 }
 
+.address-section,
 .guest-section {
   display: grid;
   gap: 16px;
@@ -264,7 +382,8 @@ async function submit() {
   background: rgba(241, 244, 251, 0.78);
 }
 
-.guest-header {
+.guest-header,
+.address-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -329,18 +448,28 @@ async function submit() {
   background: rgba(216, 78, 56, 0.12);
 }
 
+@media (max-width: 980px) {
+  .address-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 860px) {
   .field-grid,
-  .guest-row {
+  .guest-row,
+  .address-grid {
     grid-template-columns: 1fr;
   }
 
-  .guest-header {
+  .guest-header,
+  .address-header {
     flex-direction: column;
   }
 
-  .guest-age {
+  .guest-age,
+  .field-span-2 {
     max-width: none;
+    grid-column: auto;
   }
 }
 
@@ -351,6 +480,7 @@ async function submit() {
     border-radius: 24px;
   }
 
+  .address-section,
   .guest-section {
     padding: 18px;
   }

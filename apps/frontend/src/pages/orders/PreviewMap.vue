@@ -13,7 +13,7 @@
       <header class="card hero-card">
         <span class="eyebrow">Mapa da festa</span>
         <h1>{{ order.name }}</h1>
-        <p>{{ order.address }}</p>
+        <p class="address-copy">{{ formattedAddress }}</p>
       </header>
 
       <section class="card frame-card">
@@ -39,7 +39,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import type { Order } from '@/models/Order';
 import { OrdersService } from '@/services/OrdersService';
-import { buildMapEmbedUrl, buildStreetViewUrl } from '@/utils/orderInvite';
+import { buildMapEmbedUrl, buildStreetViewUrl, formatOrderAddress } from '@/utils/orderInvite';
 import spiderBackground from '@/assets/images/Mobile/Super Heróis/Homem-Aranha/bg1.png';
 
 const route = useRoute();
@@ -51,8 +51,9 @@ const pageStyle = computed(() => ({
   '--invite-bg': `url('${spiderBackground}')`,
 }));
 
-const mapEmbedUrl = computed(() => buildMapEmbedUrl(order.value?.address));
-const streetViewUrl = computed(() => buildStreetViewUrl(order.value?.address));
+const formattedAddress = computed(() => formatOrderAddress(order.value));
+const mapEmbedUrl = computed(() => buildMapEmbedUrl(order.value));
+const streetViewUrl = computed(() => buildStreetViewUrl(order.value));
 
 onMounted(async () => {
   try {
@@ -61,7 +62,7 @@ onMounted(async () => {
     error.value =
       requestError?.response?.data?.message ||
       requestError?.message ||
-      'Nao foi possivel carregar o mapa.';
+      'Não foi possível carregar o mapa.';
   } finally {
     loading.value = false;
   }
@@ -165,9 +166,10 @@ onMounted(async () => {
   letter-spacing: 0.08em;
 }
 
-.hero-card p {
+.address-copy {
   margin: 0;
   line-height: 1.7;
+  white-space: pre-line;
   color: rgba(255, 255, 255, 0.78);
 }
 
