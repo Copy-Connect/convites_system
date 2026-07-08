@@ -17,14 +17,14 @@
     <div class="content-grid">
       <article class="card">
         <h2>PIX</h2>
-        <p>Gere o pagamento do pedido e acompanhe a confirmação por aqui.</p>
+        <p>Gere o pagamento do pedido e acompanhe a confirmacao por aqui.</p>
 
         <button v-if="!payment" :disabled="busy" @click="createPix">
           {{ busy ? 'Gerando PIX...' : 'Gerar pagamento' }}
         </button>
 
         <div v-else class="payment-box">
-          <p><strong>Transação:</strong> {{ payment.transactionId || payment.id }}</p>
+          <p><strong>Transacao:</strong> {{ payment.transactionId || payment.id }}</p>
           <p><strong>Status:</strong> {{ paymentStatus }}</p>
         </div>
 
@@ -33,10 +33,19 @@
 
       <article class="card">
         <h2>Convite</h2>
-        <p>Quando o pagamento estiver aprovado, gere o convite final.</p>
+        <p>Visualize a prévia mobile quando quiser e gere o convite final depois do pagamento.</p>
+
+        <RouterLink
+          class="preview-link"
+          :to="{ name: 'orders-invite-preview', params: { id: order.id } }"
+        >
+          Visualizar convite
+        </RouterLink>
+
         <button :disabled="busy || paymentStatus !== 'PAID'" @click="generateInvite">
-          Gerar convite
+          Gerar convite final
         </button>
+
         <a v-if="invitePath" :href="apiBase + invitePath" target="_blank" rel="noopener">
           Abrir convite gerado
         </a>
@@ -228,7 +237,8 @@ onUnmounted(clearTimer);
 }
 
 .card button,
-.card a {
+.card a,
+.preview-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -250,7 +260,8 @@ onUnmounted(clearTimer);
   cursor: wait;
 }
 
-.card a {
+.card a,
+.preview-link {
   color: #20345d;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: inset 0 0 0 1px rgba(31, 47, 87, 0.08);

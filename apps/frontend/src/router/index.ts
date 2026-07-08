@@ -15,6 +15,18 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/PagSeguroReturn.vue'),
   },
   {
+    path: '/orders/:id/preview',
+    name: 'orders-invite-preview',
+    component: () => import('@/pages/orders/PreviewInvite.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/orders/:id/preview/map',
+    name: 'orders-invite-map',
+    component: () => import('@/pages/orders/PreviewMap.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/',
     component: () => import('@/layouts/AppLayout.vue'),
     meta: { requiresAuth: true },

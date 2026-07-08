@@ -14,14 +14,14 @@
 
     <section class="content-grid">
       <article class="info-card">
-        <h2>Informações principais</h2>
+        <h2>Informacoes principais</h2>
         <dl>
           <div>
-            <dt>Código</dt>
+            <dt>Codigo</dt>
             <dd>{{ getOrderCode(order) }}</dd>
           </div>
           <div>
-            <dt>Criança</dt>
+            <dt>Aniversariante</dt>
             <dd>{{ order.name }}</dd>
           </div>
           <div>
@@ -32,9 +32,17 @@
             <dt>Tema</dt>
             <dd>{{ getOrderThemeLabel(order) }}</dd>
           </div>
-          <div>
-            <dt>Endereço</dt>
+          <div class="span-all">
+            <dt>Endereco</dt>
             <dd>{{ order.address }}</dd>
+          </div>
+          <div class="span-all">
+            <dt>Ideias de presentes</dt>
+            <dd>{{ giftIdeasLabel }}</dd>
+          </div>
+          <div class="span-all">
+            <dt>Convidados sugeridos</dt>
+            <dd>{{ possibleGuestsLabel }}</dd>
           </div>
           <div>
             <dt>Criado em</dt>
@@ -44,8 +52,15 @@
       </article>
 
       <aside class="action-card">
-        <h2>Próximo passo</h2>
-        <p>Abra o checkout para gerar o PIX, acompanhar a confirmação e liberar o convite final.</p>
+        <h2>Proximos passos</h2>
+        <p>Abra a prévia mobile do convite ou siga para o checkout para liberar a entrega final.</p>
+
+        <RouterLink
+          class="secondary-link"
+          :to="{ name: 'orders-invite-preview', params: { id: order.id } }"
+        >
+          Visualizar convite
+        </RouterLink>
 
         <RouterLink class="primary-link" :to="{ name: 'orders-checkout', params: { id: order.id } }">
           Ir para pagamento
@@ -58,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { OrdersService } from '@/services/OrdersService';
 import type { Order } from '@/models/Order';
@@ -70,9 +85,20 @@ import {
   getOrderThemeLabel,
   getOrderTitle,
 } from '@/utils/orderPresentation';
+import { formatGuestLabel, parseGiftIdeas } from '@/utils/orderInvite';
 
 const route = useRoute();
 const order = ref<Order | null>(null);
+
+const giftIdeasLabel = computed(() => {
+  const items = parseGiftIdeas(order.value?.giftIdeas);
+  return items.length ? items.join(' • ') : 'Nenhuma sugestao cadastrada.';
+});
+
+const possibleGuestsLabel = computed(() => {
+  const guests = order.value?.possibleGuests ?? [];
+  return guests.length ? guests.map(formatGuestLabel).join(' • ') : 'Nenhum convidado sugerido.';
+});
 
 onMounted(async () => {
   order.value = await OrdersService.get(String(route.params.id));
@@ -150,6 +176,10 @@ onMounted(async () => {
   margin: 0;
 }
 
+.span-all {
+  grid-column: 1 / -1;
+}
+
 .info-card dt {
   font-size: 0.78rem;
   font-weight: 800;
@@ -160,6 +190,7 @@ onMounted(async () => {
 
 .info-card dd {
   margin: 8px 0 0;
+  line-height: 1.65;
   color: #1c2e51;
 }
 
@@ -194,6 +225,7 @@ onMounted(async () => {
   background: rgba(245, 216, 211, 0.88);
 }
 
+.secondary-link,
 .primary-link {
   display: inline-flex;
   align-items: center;
@@ -203,6 +235,15 @@ onMounted(async () => {
   padding: 0 1.2rem;
   border-radius: 18px;
   font-weight: 800;
+}
+
+.secondary-link {
+  color: #20345d;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: inset 0 0 0 1px rgba(31, 47, 87, 0.08);
+}
+
+.primary-link {
   color: #fff9f4;
   background: linear-gradient(135deg, #f36f5d 0%, #c4473d 100%);
   box-shadow: 0 18px 30px rgba(196, 71, 61, 0.2);
@@ -217,6 +258,10 @@ onMounted(async () => {
 
   .info-card dl {
     grid-template-columns: 1fr;
+  }
+
+  .span-all {
+    grid-column: auto;
   }
 }
 </style>

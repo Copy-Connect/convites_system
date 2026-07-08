@@ -1,8 +1,15 @@
+export type OrderGuest = {
+  name: string;
+  age: number;
+};
+
 export class Order {
   id?: string;
   name = '';
   age?: number;
   address = '';
+  giftIdeas = '';
+  possibleGuests: OrderGuest[] = [];
   themeSlug = '';
   themeName?: string | null;
   slug?: string;
