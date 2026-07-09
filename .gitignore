@@ -27,6 +27,9 @@ Thumbs.db
 apps/backend/prisma/*.db
 apps/backend/prisma/*.sqlite
 apps/backend/prisma/migrations/*/steps.json
+apps/backend/prisma/*.db-shm
+apps/backend/prisma/*.db-wal
+apps/backend/prisma/*.db-journal
 
 # Uploads / públicos gerados
 apps/backend/public/uploads/
