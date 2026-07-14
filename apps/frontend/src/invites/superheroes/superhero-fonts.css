@@ -1,0 +1,119 @@
+@font-face {
+  font-family: 'Aquaman Invite';
+  src: url('../../assets/fonts/SuperHerois/Aquaman/Aquawax-Pro-DemiBold-trial.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Aranhaverso Invite';
+  src: url('../../assets/fonts/SuperHerois/AranhaVerso/The Amazing Spider-Man.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Batman Invite';
+  src: url('../../assets/fonts/SuperHerois/Batman/batmfa__.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Captain Invite';
+  src: url('../../assets/fonts/SuperHerois/Capitão América/American Captain.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Flash Invite';
+  src: url('../../assets/fonts/SuperHerois/Flash/Elements.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Guardians Invite';
+  src: url('../../assets/fonts/SuperHerois/Guardiões das Galáxias/Guardians.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Iron Man Invite';
+  src: url('../../assets/fonts/SuperHerois/Homem de Ferro/Stark Bold.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spider-Man Invite';
+  src: url('../../assets/fonts/SuperHerois/Homem Aranha/spider-man.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Hulk Invite';
+  src: url('../../assets/fonts/SuperHerois/Hulk/Hulk Comic.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Teen Titans Invite';
+  src: url('../../assets/fonts/SuperHerois/Jovens Titãns/ttg_by_westralinc-dbnnkt8.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ladybug Invite';
+  src: url('../../assets/fonts/SuperHerois/LadyBug/Lobster 1.4.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Justice League Invite';
+  src: url('../../assets/fonts/SuperHerois/Liga da Justiça/JUSTICE LEAGUE.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Miles Morales Invite';
+  src: url('../../assets/fonts/SuperHerois/MilesMorales/Furious Styles - Demo.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Wonder Woman Invite';
+  src: url('../../assets/fonts/SuperHerois/Mulher Maravilha/Wonder-Woman.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Incredibles Invite';
+  src: url('../../assets/fonts/SuperHerois/Incríveis/Incredibles, The.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Black Panther Invite';
+  src: url('../../assets/fonts/SuperHerois/PanteraNegra/DecoturaICG.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PJ Masks Invite';
+  src: url('../../assets/fonts/SuperHerois/Pjmask/Good Times Rg.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Superman Invite';
+  src: url('../../assets/fonts/SuperHerois/Superman/Smallville1.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Thor Invite';
+  src: url('../../assets/fonts/SuperHerois/Thor/Good Times Rg.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Avengers Invite';
+  src: url('../../assets/fonts/SuperHerois/Vingadores/AVENGEANCE HEROIC AVENGER AT.otf') format('opentype');
+  font-display: swap;
+}

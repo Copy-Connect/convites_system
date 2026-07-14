@@ -14,12 +14,6 @@
   --shadow: 0 24px 70px rgba(28, 39, 77, 0.18);
 }
 
-@font-face {
-  font-family: "Spider-Man Invite";
-  src: url("./fonts/SuperHerois/Homem Aranha/spider-man.otf") format("opentype");
-  font-display: swap;
-}
-
 * {
   box-sizing: border-box;
 }

@@ -4,7 +4,7 @@
       <div>
         <span class="eyebrow">Novo pedido</span>
         <h1>Montar convite mobile</h1>
-        <p>Cadastre os dados da festa para visualizar a previa do convite com o tema Homem-Aranha.</p>
+        <p>Cadastre os dados da festa e escolha o universo do convite mobile.</p>
       </div>
     </header>
 
@@ -111,9 +111,13 @@
       </section>
 
       <label class="field">
-        <span>Tema inicial</span>
-        <input :model-value="themeLabel" readonly />
-        <small>Por enquanto a previa mobile sera exibida apenas com o tema Homem-Aranha.</small>
+        <span>Tema do convite</span>
+        <select v-model="themeSlug" required>
+          <option v-for="theme in superheroThemeOptions" :key="theme.slug" :value="theme.slug">
+            {{ theme.name }}
+          </option>
+        </select>
+        <small>Cada tema utiliza seu próprio fundo, botão, fonte, música e efeito sonoro.</small>
       </label>
 
       <label class="field">
@@ -135,12 +139,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { OrdersService } from '@/services/OrdersService';
 import { useRouter } from 'vue-router';
 import { formatOrderAddress, formatZipCode } from '@/utils/orderInvite';
+import {
+  defaultSuperheroThemeSlug,
+  superheroThemeOptions,
+} from '@/invites/superheroes/catalog';
 
-const themeSlug = 'homem-aranha';
+const themeSlug = ref(defaultSuperheroThemeSlug);
 const name = ref('');
 const age = ref<number | undefined>();
 const zipCode = ref('');
@@ -156,8 +164,6 @@ const giftIdeas = ref('');
 const loading = ref(false);
 const error = ref('');
 const router = useRouter();
-
-const themeLabel = computed(() => 'Homem-Aranha');
 
 function updateZipCode(event: Event) {
   const target = event.target as HTMLInputElement;
@@ -229,7 +235,7 @@ async function submit() {
       complement: complement.value,
       referencePoint: referencePoint.value,
       inviteImageUrl: inviteImageUrl.value,
-      themeSlug,
+      themeSlug: themeSlug.value,
       giftIdeas: giftIdeas.value,
       possibleGuests: [],
     });
