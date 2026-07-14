@@ -1,4 +1,5 @@
 import type { Order } from '@/models/Order';
+import { superheroThemeOptions } from '@/invites/superheroes/catalog';
 
 export type OrderUiState = 'pending_payment' | 'in_progress' | 'completed' | 'canceled';
 
@@ -53,11 +54,9 @@ export function getOrderStatusClass(order: Order) {
 
 export function getOrderThemeLabel(order: Order) {
   const themeSlug = (order.themeSlug || '').trim().toLowerCase();
-  const themeLabels: Record<string, string> = {
-    'homem-aranha': 'Homem-Aranha',
-  };
+  const catalogTheme = superheroThemeOptions.find((theme) => theme.slug === themeSlug);
 
-  return order.themeName || themeLabels[themeSlug] || order.themeSlug || 'Tema nao informado';
+  return order.themeName || catalogTheme?.name || order.themeSlug || 'Tema não informado';
 }
 
 export function getOrderCode(order: Order) {

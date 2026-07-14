@@ -1,5 +1,5 @@
 <template>
-  <section class="map-preview" :style="pageStyle">
+  <section class="map-preview" :class="`theme-${theme.visual}`" :style="pageStyle">
     <div class="overlay" />
 
     <div v-if="loading" class="state-card">Carregando mapa...</div>
@@ -20,6 +20,7 @@
         <iframe
           class="map-frame"
           :src="mapEmbedUrl"
+          title="Mapa do endereço da festa"
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
         />
@@ -37,18 +38,31 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { getSuperheroTheme } from '@/invites/superheroes/themes';
 import type { Order } from '@/models/Order';
 import { OrdersService } from '@/services/OrdersService';
 import { buildMapEmbedUrl, buildStreetViewUrl, formatOrderAddress } from '@/utils/orderInvite';
-import spiderBackground from '@/assets/images/Mobile/Super Heróis/Homem-Aranha/bg1.png';
+import '@/invites/superheroes/superhero-fonts.css';
 
 const route = useRoute();
 const order = ref<Order | null>(null);
 const loading = ref(true);
 const error = ref('');
 
+const theme = computed(() => getSuperheroTheme(order.value?.themeSlug));
 const pageStyle = computed(() => ({
-  '--invite-bg': `url('${spiderBackground}')`,
+  '--invite-bg': `url('${theme.value.backgroundUrl}')`,
+  '--theme-font': theme.value.fontFamily,
+  '--theme-primary': theme.value.primary,
+  '--theme-secondary': theme.value.secondary,
+  '--theme-highlight': theme.value.highlight,
+  '--theme-panel': theme.value.panel,
+  '--theme-panel-strong': theme.value.panelStrong,
+  '--theme-line': theme.value.line,
+  '--theme-overlay': theme.value.overlay,
+  '--theme-glow': theme.value.glow,
+  '--theme-card-radius': theme.value.cardRadius,
+  '--theme-bg-position': theme.value.backgroundPosition,
 }));
 
 const formattedAddress = computed(() => formatOrderAddress(order.value));
@@ -73,15 +87,19 @@ onMounted(async () => {
 .map-preview {
   position: relative;
   min-height: 100vh;
+  color: #ffffff;
   background-image: var(--invite-bg);
-  background-position: center;
+  background-position: var(--theme-bg-position);
   background-size: cover;
+  background-attachment: fixed;
+  isolation: isolate;
 }
 
 .overlay {
-  position: absolute;
+  position: fixed;
+  z-index: -1;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(7, 8, 15, 0.84));
+  background: var(--theme-overlay);
 }
 
 .state-card,
@@ -94,10 +112,10 @@ onMounted(async () => {
   width: min(440px, calc(100% - 32px));
   margin: 120px auto 0;
   padding: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 28px;
+  border: 1px solid var(--theme-line);
+  border-radius: var(--theme-card-radius);
   color: #ffffff;
-  background: rgba(11, 13, 20, 0.78);
+  background: var(--theme-panel);
   backdrop-filter: blur(18px);
 }
 
@@ -108,7 +126,7 @@ onMounted(async () => {
 .map-shell {
   width: min(460px, 100%);
   margin: 0 auto;
-  padding: 22px 18px 32px;
+  padding: max(22px, env(safe-area-inset-top)) 18px max(34px, env(safe-area-inset-bottom));
   display: grid;
   gap: 16px;
 }
@@ -118,7 +136,6 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: fit-content;
   min-height: 50px;
   padding: 0 1rem;
   border-radius: 16px;
@@ -126,32 +143,35 @@ onMounted(async () => {
 }
 
 .back-link {
+  width: fit-content;
+  border: 1px solid var(--theme-line);
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--theme-panel);
   backdrop-filter: blur(12px);
 }
 
 .card {
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 28px;
+  border: 1px solid var(--theme-line);
+  border-radius: var(--theme-card-radius);
   color: #ffffff;
-  background: rgba(9, 11, 20, 0.74);
+  background: var(--theme-panel);
   backdrop-filter: blur(18px);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3), 0 0 28px var(--theme-glow);
 }
 
 .eyebrow {
   display: inline-flex;
   width: fit-content;
   padding: 0.52rem 0.84rem;
+  border: 1px solid var(--theme-line);
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--theme-highlight);
+  background: var(--theme-panel-strong);
 }
 
 .hero-card {
@@ -161,16 +181,18 @@ onMounted(async () => {
 
 .hero-card h1 {
   margin: 0;
-  font-family: 'Spider-Man Invite', 'Trebuchet MS', sans-serif;
+  font-family: var(--theme-font);
   font-size: clamp(2.6rem, 10vw, 4.2rem);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.55), 0 0 20px var(--theme-glow);
 }
 
 .address-copy {
   margin: 0;
   line-height: 1.7;
   white-space: pre-line;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .frame-card {
@@ -181,19 +203,19 @@ onMounted(async () => {
   width: 100%;
   min-height: 58vh;
   border: 0;
-  border-radius: 20px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.12);
 }
 
-.actions {
-  display: flex;
-  justify-content: center;
+.actions,
+.primary-button {
+  width: 100%;
 }
 
 .primary-button {
   color: #ffffff;
-  background: linear-gradient(135deg, #f22d3e 0%, #8d0a16 100%);
-  box-shadow: 0 16px 28px rgba(73, 0, 6, 0.38);
+  background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+  box-shadow: 0 16px 28px var(--theme-glow);
 }
 
 @media (max-width: 420px) {
@@ -203,12 +225,6 @@ onMounted(async () => {
 
   .card {
     padding: 18px;
-    border-radius: 24px;
-  }
-
-  .actions,
-  .primary-button {
-    width: 100%;
   }
 }
 </style>
