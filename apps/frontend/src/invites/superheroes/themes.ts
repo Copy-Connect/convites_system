@@ -39,6 +39,27 @@ import thorButton from '@/assets/images/Mobile/Super Heróis/Thor/bt1.png';
 import avengersBackground from '@/assets/images/Mobile/Super Heróis/Vingadores/bg1.png';
 import avengersButton from '@/assets/images/Mobile/Super Heróis/Vingadores/bt1.png';
 
+import aquamanDesktopBackground from '@/assets/images/Desktop/Aquaman/bg1.png';
+import aranhaversoDesktopBackground from '@/assets/images/Desktop/Aranhaverso/bg1.png';
+import batmanDesktopBackground from '@/assets/images/Desktop/Batman/bg1.png';
+import captainDesktopBackground from '@/assets/images/Desktop/capitao-america/bg1.png';
+import flashDesktopBackground from '@/assets/images/Desktop/flash/bg1.png';
+import guardiansDesktopBackground from '@/assets/images/Desktop/guardioes-galaxias/bg1.png';
+import ironManDesktopBackground from '@/assets/images/Desktop/homem de ferro/bg1.png';
+import spiderManDesktopBackground from '@/assets/images/Desktop/homemAranha/bg1.png';
+import hulkDesktopBackground from '@/assets/images/Desktop/Hulk/bg1.png';
+import teenTitansDesktopBackground from '@/assets/images/Desktop/jovensTitans/bg1.png';
+import ladybugDesktopBackground from '@/assets/images/Desktop/ladybug/bg1.png';
+import justiceLeagueDesktopBackground from '@/assets/images/Desktop/ligadajustica/bg1.png';
+import milesDesktopBackground from '@/assets/images/Desktop/MilesMorales/bg1.png';
+import wonderWomanDesktopBackground from '@/assets/images/Desktop/MulherMaravilha/bg1.png';
+import incrediblesDesktopBackground from '@/assets/images/Desktop/osincriveis/bg1.png';
+import blackPantherDesktopBackground from '@/assets/images/Desktop/PanteraNegra/bg1.png';
+import pjMasksDesktopBackground from '@/assets/images/Desktop/pjmask/bg1.png';
+import supermanDesktopBackground from '@/assets/images/Desktop/superman/bg1.png';
+import thorDesktopBackground from '@/assets/images/Desktop/Thor/bg1.png';
+import avengersDesktopBackground from '@/assets/images/Desktop/Vingadores/bg1.png';
+
 import aquamanMusic from '@/assets/music/Super Heróis/Aquaman/AQUAMAN theme 2018 (music from the Boston Aquarium scene and title sequence) - T E R M I N A T O R (youtube).mp3';
 import aranhaversoMusic from '@/assets/music/Super Heróis/SpiderMan Aranhaverso/Post Malone, Swae Lee - Sunflower (Spider-Man Into the Spider-Verse) - PostMaloneVEVO (youtube).mp3';
 import batmanMusic from '@/assets/music/Super Heróis/Batman/Neal Hefti & his Orchestra and Chorus - Batman Theme (Audio) - LegacyRecordingsVEVO (youtube).mp3';
@@ -84,6 +105,7 @@ export type SuperheroTheme = {
   slug: SuperheroThemeSlug;
   name: string;
   backgroundUrl: string;
+  desktopBackgroundUrl: string;
   buttonUrl: string;
   musicUrl: string;
   clickSoundUrl: string;
@@ -110,6 +132,29 @@ export type SuperheroTheme = {
   };
 };
 
+const desktopBackgrounds: Record<SuperheroThemeSlug, string> = {
+  aquaman: aquamanDesktopBackground,
+  aranhaverso: aranhaversoDesktopBackground,
+  batman: batmanDesktopBackground,
+  'capitao-america': captainDesktopBackground,
+  flash: flashDesktopBackground,
+  'guardioes-da-galaxia': guardiansDesktopBackground,
+  'homem-de-ferro': ironManDesktopBackground,
+  'homem-aranha': spiderManDesktopBackground,
+  hulk: hulkDesktopBackground,
+  'jovens-titans': teenTitansDesktopBackground,
+  ladybug: ladybugDesktopBackground,
+  'liga-da-justica': justiceLeagueDesktopBackground,
+  'miles-morales': milesDesktopBackground,
+  'mulher-maravilha': wonderWomanDesktopBackground,
+  'os-incriveis': incrediblesDesktopBackground,
+  'pantera-negra': blackPantherDesktopBackground,
+  'pj-masks': pjMasksDesktopBackground,
+  superman: supermanDesktopBackground,
+  thor: thorDesktopBackground,
+  vingadores: avengersDesktopBackground,
+};
+
 const commonCopy = {
   entryEyebrow: 'Convite especial',
   entry: 'Olá, você foi convidado para a minha festa. Toque no botão abaixo para confirmar sua presença.',
@@ -119,10 +164,13 @@ const commonCopy = {
 };
 
 function theme(
-  config: Omit<SuperheroTheme, 'copy'> & { copy?: Partial<SuperheroTheme['copy']> },
+  config: Omit<SuperheroTheme, 'copy' | 'desktopBackgroundUrl'> & {
+    copy?: Partial<SuperheroTheme['copy']>;
+  },
 ): SuperheroTheme {
   return {
     ...config,
+    desktopBackgroundUrl: desktopBackgrounds[config.slug],
     copy: { ...commonCopy, ...config.copy },
   };
 }

@@ -51,7 +51,8 @@ const error = ref('');
 
 const theme = computed(() => getSuperheroTheme(order.value?.themeSlug));
 const pageStyle = computed(() => ({
-  '--invite-bg': `url('${theme.value.backgroundUrl}')`,
+  '--invite-bg-mobile': `url('${theme.value.backgroundUrl}')`,
+  '--invite-bg-desktop': `url('${theme.value.desktopBackgroundUrl}')`,
   '--theme-font': theme.value.fontFamily,
   '--theme-primary': theme.value.primary,
   '--theme-secondary': theme.value.secondary,
@@ -88,11 +89,17 @@ onMounted(async () => {
   position: relative;
   min-height: 100vh;
   color: #ffffff;
-  background-image: var(--invite-bg);
+  background-image: var(--invite-bg-mobile);
   background-position: var(--theme-bg-position);
   background-size: cover;
   background-attachment: fixed;
   isolation: isolate;
+}
+
+@media (min-width: 768px) {
+  .map-preview {
+    background-image: var(--invite-bg-desktop);
+  }
 }
 
 .overlay {

@@ -186,7 +186,8 @@ const musicRef = ref<HTMLAudioElement | null>(null);
 const clickRef = ref<HTMLAudioElement | null>(null);
 
 const pageStyle = computed(() => ({
-  '--invite-bg': `url('${props.theme.backgroundUrl}')`,
+  '--invite-bg-mobile': `url('${props.theme.backgroundUrl}')`,
+  '--invite-bg-desktop': `url('${props.theme.desktopBackgroundUrl}')`,
   '--theme-font': props.theme.fontFamily,
   '--theme-primary': props.theme.primary,
   '--theme-secondary': props.theme.secondary,
@@ -317,11 +318,12 @@ onUnmounted(() => {
   --theme-muted: rgba(255, 255, 255, 0.78);
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--theme-text);
-  background-image: var(--invite-bg);
+  background-image: var(--invite-bg-mobile);
   background-position: var(--theme-bg-position);
   background-size: cover;
-  background-attachment: fixed;
+  background-attachment: scroll;
   overflow: hidden;
   isolation: isolate;
 }
@@ -351,6 +353,7 @@ onUnmounted(() => {
 
 .entry-screen {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   grid-template-rows: 1fr auto 1fr;
   justify-items: center;
@@ -778,6 +781,118 @@ onUnmounted(() => {
 
   .entry-screen {
     padding-inline: 20px;
+  }
+}
+
+@media (min-width: 768px) {
+  .invite-preview {
+    background-image: var(--invite-bg-desktop);
+    background-attachment: fixed;
+  }
+
+  .entry-screen {
+    width: min(1320px, 100%);
+    margin-inline: auto;
+    grid-template-columns: minmax(320px, 480px) minmax(220px, 330px);
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+      'copy photo'
+      'button photo';
+    justify-content: space-between;
+    align-items: center;
+    column-gap: clamp(56px, 10vw, 220px);
+    row-gap: 18px;
+    padding: max(38px, env(safe-area-inset-top)) clamp(36px, 5vw, 76px)
+      max(38px, env(safe-area-inset-bottom));
+    text-align: left;
+  }
+
+  .entry-copy {
+    grid-area: copy;
+    align-self: end;
+    justify-items: start;
+    max-width: 480px;
+  }
+
+  .entry-copy h1 {
+    font-size: clamp(4rem, 7vw, 6.8rem);
+  }
+
+  .entry-copy p {
+    font-size: 1.05rem;
+  }
+
+  .entry-photo-wrap {
+    grid-area: photo;
+    width: min(300px, 24vw);
+    justify-self: end;
+  }
+
+  .entry-button {
+    grid-area: button;
+    align-self: start;
+    justify-self: start;
+    width: min(360px, 100%);
+  }
+
+  .entry-button-art {
+    width: min(82%, 290px);
+  }
+
+  .invite-shell {
+    width: min(1160px, 100%);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    padding: max(34px, env(safe-area-inset-top)) clamp(24px, 4vw, 48px)
+      max(48px, env(safe-area-inset-bottom));
+  }
+
+  .back-link,
+  .hero-card {
+    grid-column: 1 / -1;
+  }
+
+  .invite-shell > section:nth-of-type(1) {
+    grid-row: span 2;
+  }
+
+  .card {
+    padding: clamp(25px, 3vw, 34px);
+  }
+
+  .hero-card h1 {
+    font-size: clamp(3.6rem, 7vw, 6.2rem);
+  }
+
+  .gift-grid,
+  .address-actions,
+  .form-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .gift-chip,
+  .address-actions > *,
+  .form-actions > * {
+    flex: 1 1 190px;
+  }
+}
+
+@media (min-width: 768px) and (max-height: 680px) {
+  .entry-screen {
+    padding-block: 24px;
+  }
+
+  .entry-copy {
+    gap: 9px;
+  }
+
+  .entry-copy h1 {
+    font-size: clamp(3.2rem, 8vh, 5rem);
+  }
+
+  .entry-photo-wrap {
+    width: min(230px, 22vw, 38vh);
   }
 }
 
