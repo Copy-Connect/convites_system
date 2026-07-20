@@ -1,5 +1,9 @@
 <template>
-  <section class="invite-preview" :class="`theme-${theme.visual}`" :style="pageStyle">
+  <section
+    class="invite-preview"
+    :class="[`theme-${theme.visual}`, { 'background-ready': backgroundReady }]"
+    :style="pageStyle"
+  >
     <div class="overlay" />
     <div class="theme-atmosphere" aria-hidden="true" />
 
@@ -184,6 +188,7 @@ const guestAge = ref('');
 const confirmedGuests = ref<ConfirmedGuest[]>([]);
 const musicRef = ref<HTMLAudioElement | null>(null);
 const clickRef = ref<HTMLAudioElement | null>(null);
+const backgroundReady = ref(false);
 
 const pageStyle = computed(() => ({
   '--invite-bg-mobile': `url('${props.theme.backgroundUrl}')`,
@@ -298,6 +303,21 @@ function handleVisibilityChange() {
 }
 
 onMounted(() => {
+  const backgroundImage = new Image();
+  const revealBackground = () => {
+    backgroundReady.value = true;
+  };
+
+  backgroundImage.addEventListener('load', revealBackground, { once: true });
+  backgroundImage.addEventListener('error', revealBackground, { once: true });
+  backgroundImage.src = window.matchMedia('(min-width: 768px)').matches
+    ? props.theme.desktopBackgroundUrl
+    : props.theme.backgroundUrl;
+
+  if (backgroundImage.complete) {
+    revealBackground();
+  }
+
   window.addEventListener('pointerdown', handleUserGesture);
   window.addEventListener('keydown', handleUserGesture);
   document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -320,12 +340,49 @@ onUnmounted(() => {
   min-height: 100vh;
   min-height: 100dvh;
   color: var(--theme-text);
+  background: #030607;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.invite-preview::before,
+.invite-preview::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.invite-preview::before {
+  z-index: -3;
+  opacity: 0;
   background-image: var(--invite-bg-mobile);
   background-position: var(--theme-bg-position);
   background-size: cover;
-  background-attachment: scroll;
-  overflow: hidden;
-  isolation: isolate;
+  transform: scale(1.3);
+  filter: brightness(2.1) saturate(0.55) blur(10px);
+  will-change: opacity, transform, filter;
+}
+
+.invite-preview::after {
+  z-index: 0;
+  opacity: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.88) 0,
+    color-mix(in srgb, var(--theme-highlight) 58%, transparent) 12%,
+    transparent 48%
+  );
+  mix-blend-mode: screen;
+  will-change: opacity, transform;
+}
+
+.invite-preview.background-ready::before {
+  animation: background-impact 1.2s cubic-bezier(.16, .8, .24, 1) forwards;
+}
+
+.invite-preview.background-ready::after {
+  animation: background-flash 900ms cubic-bezier(.16, .8, .24, 1) forwards;
 }
 
 .overlay,
@@ -342,13 +399,17 @@ onUnmounted(() => {
 
 .theme-atmosphere {
   z-index: -1;
-  opacity: 0.34;
+  opacity: 0;
   background:
     radial-gradient(circle at 14% 18%, var(--theme-primary) 0 2px, transparent 3px),
     radial-gradient(circle at 84% 22%, var(--theme-highlight) 0 1px, transparent 2px),
     linear-gradient(125deg, transparent 0 48%, var(--theme-line) 49% 50%, transparent 51% 100%);
   background-size: 84px 84px, 112px 112px, 190px 190px;
   mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+.background-ready .theme-atmosphere {
+  animation: atmosphere-arrival 1.15s 240ms ease-out forwards;
 }
 
 .entry-screen {
@@ -463,15 +524,18 @@ onUnmounted(() => {
 
 .reveal {
   opacity: 0;
-  animation: entry-reveal 700ms cubic-bezier(.2, .8, .2, 1) forwards;
 }
 
-.reveal-photo {
-  animation-delay: 140ms;
+.background-ready .reveal {
+  animation: entry-reveal 700ms 1.35s cubic-bezier(.2, .8, .2, 1) forwards;
 }
 
-.reveal-button {
-  animation-delay: 280ms;
+.background-ready .reveal-photo {
+  animation-delay: 1.5s;
+}
+
+.background-ready .reveal-button {
+  animation-delay: 1.75s;
 }
 
 .invite-shell {
@@ -759,6 +823,55 @@ onUnmounted(() => {
   }
 }
 
+@keyframes background-impact {
+  0% {
+    opacity: 0;
+    transform: scale(1.3);
+    filter: brightness(2.1) saturate(0.55) blur(10px);
+  }
+  18% {
+    opacity: 1;
+    filter: brightness(1.7) saturate(1.45) blur(0);
+  }
+  58% {
+    opacity: 1;
+    transform: scale(1.045);
+    filter: brightness(1.12) saturate(1.15) blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1) saturate(1) blur(0);
+  }
+}
+
+@keyframes background-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  14% {
+    opacity: 0.86;
+  }
+  42% {
+    opacity: 0.2;
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+}
+
+@keyframes atmosphere-arrival {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.34;
+  }
+}
+
 @keyframes invite-reveal {
   from {
     opacity: 0;
@@ -785,12 +898,12 @@ onUnmounted(() => {
 }
 
 @media (min-width: 768px) {
-  .invite-preview {
+  .invite-preview::before {
     background-image: var(--invite-bg-desktop);
-    background-attachment: fixed;
   }
 
   .entry-screen {
+    position: relative;
     width: min(1320px, 100%);
     margin-inline: auto;
     grid-template-columns: minmax(320px, 480px) minmax(220px, 330px);
@@ -808,10 +921,16 @@ onUnmounted(() => {
   }
 
   .entry-copy {
-    grid-area: copy;
-    align-self: end;
-    justify-items: start;
-    max-width: 480px;
+    position: absolute;
+    z-index: 1;
+    grid-area: auto;
+    left: 50%;
+    bottom: calc(50% + 56px);
+    translate: -50% 0;
+    width: min(560px, calc(100% - 72px));
+    max-width: 560px;
+    justify-items: center;
+    text-align: center;
   }
 
   .entry-copy h1 {
@@ -829,9 +948,12 @@ onUnmounted(() => {
   }
 
   .entry-button {
-    grid-area: button;
-    align-self: start;
-    justify-self: start;
+    position: absolute;
+    z-index: 2;
+    grid-area: auto;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
     width: min(360px, 100%);
   }
 
@@ -897,9 +1019,28 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal,
+  .invite-preview::before {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .invite-preview::after {
+    display: none;
+  }
+
+  .theme-atmosphere {
+    opacity: 0.34;
+  }
+
+  .background-ready .reveal,
   .invite-reveal {
     opacity: 1;
+    animation: none;
+  }
+
+  .invite-preview.background-ready::before,
+  .background-ready .theme-atmosphere {
     animation: none;
   }
 }
