@@ -1,28 +1,29 @@
 {
- "compilerOptions": {
-    "target": "es2019",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "strict": true,
-    "esModuleInterop": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false,
-    "outDir": "./dist",
-    "baseUrl": "./src",
-    "types": ["node", "express"],
-    "rootDir": "./src",
-    "declaration": false,
-    "sourceMap": true
-  },
-  "include": [
-    "src/main.ts",
-    "src/app.module.ts",
-    "src/prisma/**/*.ts",
-    "src/payments/**/*.ts",
-    "src/invite/**/*.ts",
-    "src/types/**/*.d.ts"
-, "src/payments/payments-.module.ts"  ],
+    "compilerOptions": {
+        "target": "es2019",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "strict": true,
+        "esModuleInterop": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "useDefineForClassFields": false,
+        "outDir": "./dist",
+        "baseUrl": "./src",
+        "types": ["node", "express"],
+        "rootDir": "./src",
+        "declaration": false,
+        "sourceMap": true
+    },
+    "include": [
+        "src/main.ts",
+        "src/app.module.ts",
+        "src/prisma/**/*.ts",
+        "src/payments/**/*.ts",
+        "src/invite/**/*.ts",
+        "src/types/**/*.d.ts",
+        "src/payments/payments.module.ts"
+    ],
 
-  "exclude": ["node_modules", "dist"]
+    "exclude": ["node_modules", "dist"]
 }

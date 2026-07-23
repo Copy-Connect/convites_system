@@ -5,22 +5,27 @@ import { AppModule } from './app.module';
 import * as express from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+    const app = await NestFactory.create(AppModule, {
+        cors: {
+            origin: ["http://localhost:5173"],
+        }
+    });
 
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+    //TODO: avaliar se a limitação abaixo faz sentido aqui no main
+    app.use(express.json({ limit: '10mb' }));
+    app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-  // raw body só no webhook
-  app.use(
-    '/payments/pagseguro/notify',
-    express.json({
-      verify: (req: any, _res, buf) => {
-        req.rawBody = buf;
-      },
-    }),
-  );
+    // raw body só no webhook
+    app.use(
+        '/payments/pagseguro/notify',
+        express.json({
+        verify: (req: any, _res, buf) => {
+            req.rawBody = buf;
+        },
+        }),
+    );
 
-  const port = parseInt(process.env.PORT ?? '3000', 10); // <<< deixe só esta linha
-  await app.listen(port, '0.0.0.0');
+    const port = parseInt(process.env.PORT ?? '3000', 10); // <<< deixe só esta linha
+    await app.listen(port, '0.0.0.0');
 }
 bootstrap();
