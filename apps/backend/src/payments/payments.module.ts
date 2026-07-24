@@ -1,14 +1,16 @@
-// src/payments/payments.module.ts
 import { Module } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
-import { PagSeguroGateway } from './gateway/pagseguro.gateway';
-import { PrismaService } from '../prisma/prisma.service';
 import { PaymentsController } from './payments.controller';
-
+import { OrdersModule } from 'orders/orders.module';
+import { MercadoPagoGateway } from './gateway/mercado-pago.gateway';
 
 @Module({
-  controllers: [PaymentsController],
-  providers: [PaymentsService, PagSeguroGateway, PrismaService],
-  exports: [PaymentsService],
+    imports: [OrdersModule],
+    controllers: [PaymentsController],
+    providers: [
+        PaymentsService,
+        MercadoPagoGateway,
+    ],
+    exports: [PaymentsService, MercadoPagoGateway],
 })
 export class PaymentsModule {}

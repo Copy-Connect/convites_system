@@ -1,25 +1,32 @@
-import { ApiClient } from './ApiClient';
+// apps/frontend/src/services/PaymentsService.ts
 
-const api = new ApiClient();
+import ApiClient from './ApiClient';
 
-export const PaymentsService = {
-  createPix(orderId: string, amountCents = 1990) {
-    return api.post<{
-      id: string;
-      status: string;
-      transactionId?: string | null;
-      qrCodeUrl?: string | null;
-      checkoutUrl?: string | null;
-    }>('/payments/checkout', {
-      orderId,
-      amountCents,
-      method: 'PIX',
-    });
-  },
-  getStatusByOrder(orderId: string) {
-    return api.get<{ id: string; status: string; transactionId: string | null }>(
-      '/payments/status',
-      { order_id: orderId },
+const apiClient = new ApiClient();
+
+export interface CheckoutResponse {
+  preferenceId: string;
+  checkoutUrl: string;
+  sandboxCheckoutUrl?: string;
+}
+
+export async function createCheckout(
+  orderId: string,
+): Promise<CheckoutResponse> {
+  const response =
+    await apiClient.post<CheckoutResponse>(
+      `/payments/checkout/${orderId}`,
     );
-  },
-};
+
+  return response.data;
+}
+
+
+
+//   getStatusByOrder(orderId: string) {
+//     return api.get<{ id: string; status: string; transactionId: string | null }>(
+//       '/payments/status',
+//       { order_id: orderId },
+//     );
+//   },
+// };

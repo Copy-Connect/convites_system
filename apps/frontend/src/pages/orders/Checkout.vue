@@ -62,6 +62,8 @@ import { useRoute } from 'vue-router';
 import type { Order } from '@/models/Order';
 import { OrdersService } from '@/services/OrdersService';
 import { PaymentsService } from '@/services/PaymentsService';
+import { createCheckout } from '@/services/PaymentsService';
+
 import {
   formatMoney,
   getOrderStatusLabel,
@@ -118,11 +120,8 @@ async function createPix() {
   error.value = '';
 
   try {
-    payment.value = await PaymentsService.createPix(orderId, order.value?.amountCents ?? 1990);
-    paymentStatus.value = payment.value.status;
-    await loadOrder();
-    clearTimer();
-    timer = window.setInterval(pollStatus, 4000);
+    const checkout = await createCheckout(orderId);
+    window.location.assign(checkout.checkoutUrl);
   } catch (requestError: any) {
     error.value =
       requestError?.response?.data?.message ||

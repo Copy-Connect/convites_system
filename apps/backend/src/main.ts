@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as express from 'express';
+import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
@@ -15,15 +16,13 @@ async function bootstrap() {
     app.use(express.json({ limit: '10mb' }));
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-    // raw body só no webhook
-    app.use(
-        '/payments/pagseguro/notify',
-        express.json({
-        verify: (req: any, _res, buf) => {
-            req.rawBody = buf;
-        },
+    app.useGlobalPipes(
+        new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true,
         }),
-    );
+    )
 
     const port = parseInt(process.env.PORT ?? '3000', 10); // <<< deixe só esta linha
     await app.listen(port, '0.0.0.0');
